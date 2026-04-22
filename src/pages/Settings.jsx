@@ -138,6 +138,7 @@ export default function Settings() {
           {folders.length === 0 ? (
             <EmptyState icon="📂" title="No folders yet" hint="Create your first folder to start organizing emails." cta="Add folder" onClick={() => setFolderModal({ open: true, initial: null })} />
           ) : (
+            <div className="table-scroll">
             <table className="data-table">
               <thead><tr><th>Folder Name</th><th>Color</th><th>Priority</th><th className="right">Actions</th></tr></thead>
               <tbody>
@@ -154,6 +155,7 @@ export default function Settings() {
                 ))}
               </tbody>
             </table>
+          </div>
           )}
         </section>
 
@@ -170,6 +172,7 @@ export default function Settings() {
           {filters.length === 0 ? (
             <EmptyState icon="🎯" title="No filters yet" hint="Add a filter to route incoming emails into the right folder." cta="Add filter" onClick={() => setFilterModal({ open: true, initial: null })} />
           ) : (
+            <div className="table-scroll">
             <table className="data-table">
               <thead><tr><th>Filter Name</th><th>Keywords</th><th>Folder Name</th><th className="right">Actions</th></tr></thead>
               <tbody>
@@ -186,6 +189,7 @@ export default function Settings() {
                 ))}
               </tbody>
             </table>
+          </div>
           )}
         </section>
 

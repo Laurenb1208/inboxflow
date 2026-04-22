@@ -11,6 +11,7 @@ export default function Inbox() {
   const [loading, setLoading] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [error, setError] = useState('')
+  const [sideOpen, setSideOpen] = useState(false)
 
   const loadFolders = async () => setFolders(await api.get('/api/folders'))
   const loadEmails = async () => {
@@ -42,25 +43,35 @@ export default function Inbox() {
     if (selected?.id === updated.id) setSelected({ ...selected, manuallyImportant: updated.manuallyImportant })
   }
 
+  const activeFilterLabel = () => {
+    if (folderId === 'uncategorized') return 'Uncategorized'
+    if (folderId) return folders.find(f => f.id === folderId)?.name || 'Folder'
+    if (priority) return priority + ' priority'
+    return 'All emails'
+  }
+
   return (
     <main className="inbox-page">
       <div className="container inbox-grid">
-        <aside className="inbox-side card">
+
+        {sideOpen && <div className="side-overlay" onClick={() => setSideOpen(false)} />}
+
+        <aside className={`inbox-side card ${sideOpen ? 'side-open' : ''}`}>
           <button className="btn btn-primary btn-block" onClick={sync} disabled={syncing}>
             {syncing ? 'Syncing…' : 'Sync Now'}
           </button>
           <h4>Folders</h4>
-          <button className={`side-item ${folderId === '' ? 'on' : ''}`} onClick={() => setFolderId('')}>All emails</button>
+          <button className={`side-item ${folderId === '' ? 'on' : ''}`} onClick={() => { setFolderId(''); setSideOpen(false) }}>All emails</button>
           {folders.map(f => (
-            <button key={f.id} className={`side-item ${folderId === f.id ? 'on' : ''}`} onClick={() => setFolderId(f.id)}>
+            <button key={f.id} className={`side-item ${folderId === f.id ? 'on' : ''}`} onClick={() => { setFolderId(f.id); setSideOpen(false) }}>
               <span className="color-dot" /> {f.name}
             </button>
           ))}
-          <button className={`side-item ${folderId === 'uncategorized' ? 'on' : ''}`} onClick={() => setFolderId('uncategorized')}>Uncategorized</button>
+          <button className={`side-item ${folderId === 'uncategorized' ? 'on' : ''}`} onClick={() => { setFolderId('uncategorized'); setSideOpen(false) }}>Uncategorized</button>
 
           <h4>Priority</h4>
           {['', 'High', 'Medium', 'Low'].map(p => (
-            <button key={p || 'all'} className={`side-item ${priority === p ? 'on' : ''}`} onClick={() => setPriority(p)}>
+            <button key={p || 'all'} className={`side-item ${priority === p ? 'on' : ''}`} onClick={() => { setPriority(p); setSideOpen(false) }}>
               {p === '' ? 'All priorities' : (
                 <><span className={`r-dot pri-${p.toLowerCase()}`} /> {p}</>
               )}
@@ -70,8 +81,11 @@ export default function Inbox() {
 
         <section className="inbox-main">
           <div className="inbox-toolbar">
-            <input className="search-input" placeholder="Search subject, sender, snippet…" value={q} onChange={e => setQ(e.target.value)} />
-            <span className="muted">{emails.length} message{emails.length === 1 ? '' : 's'}</span>
+            <button className="filter-toggle" onClick={() => setSideOpen(o => !o)} aria-label="Toggle filters">
+              ☰ <span className="filter-label">{activeFilterLabel()}</span>
+            </button>
+            <input className="search-input" placeholder="Search…" value={q} onChange={e => setQ(e.target.value)} />
+            <span className="muted count-label">{emails.length} msg{emails.length === 1 ? '' : 's'}</span>
           </div>
           {error && <div className="error">{error}</div>}
           {loading ? (

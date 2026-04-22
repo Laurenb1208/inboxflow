@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom'
 import Landing from './pages/Landing.jsx'
 import Settings from './pages/Settings.jsx'
@@ -23,6 +24,9 @@ function Protected({ children }) {
 export default function App() {
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(() => { setMenuOpen(false) }, [pathname])
 
   return (
     <div className="app-shell">
@@ -31,6 +35,7 @@ export default function App() {
           <span className="brand-logo">📬</span>
           <span className="brand-name">InboxFlow</span>
         </Link>
+
         <nav className="topnav">
           <Link to="/" className={pathname === '/' ? 'active' : ''}>Home</Link>
           <Link to="/pricing" className={pathname === '/pricing' ? 'active' : ''}>Pricing</Link>
@@ -48,7 +53,38 @@ export default function App() {
             <Link to="/login" className="btn btn-primary btn-sm">Get Started</Link>
           )}
         </nav>
+
+        <button
+          className="hamburger"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen(o => !o)}
+        >
+          <span className={`ham-bar ${menuOpen ? 'open' : ''}`} />
+          <span className={`ham-bar ${menuOpen ? 'open' : ''}`} />
+          <span className={`ham-bar ${menuOpen ? 'open' : ''}`} />
+        </button>
       </header>
+
+      {menuOpen && (
+        <div className="mobile-menu">
+          <Link to="/">Home</Link>
+          <Link to="/pricing">Pricing</Link>
+          <Link to="/about">About</Link>
+          <Link to="/demo">Demo</Link>
+          {user ? (
+            <>
+              <Link to="/inbox">Inbox</Link>
+              <Link to="/settings">Settings</Link>
+              <button className="mobile-menu-signout" onClick={() => { logout(); setMenuOpen(false) }}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="mobile-menu-cta">Get Started</Link>
+          )}
+        </div>
+      )}
 
       <Routes>
         <Route path="/" element={<Landing />} />

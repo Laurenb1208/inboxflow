@@ -50,3 +50,4 @@ publicDir = "dist"
 
 [userenv.shared]
 TOKEN_ENCRYPTION_KEY = "/qVj4BK68EbI9jBBSMxufN/VwQT0MZmmUixHWhv85AA="
+GOOGLE_REDIRECT_URI = "https://006334cd-4e75-48ad-ab11-0eb9e4c5b880-00-2xphumb1dsow6.janeway.replit.dev/api/auth/google/callback"
