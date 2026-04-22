@@ -80,7 +80,11 @@ export default function Settings() {
       setToast(`Synced ${r.fetched} emails (${r.classified} categorized)`)
       await refresh()
     } catch (e) {
-      setToast('Sync failed: ' + e.message)
+      if (e.body?.error === 'gmail_scope_missing') {
+        setToast(e.body.message + ' Sign out and sign back in to fix this.')
+      } else {
+        setToast('Sync failed: ' + e.message)
+      }
     } finally {
       setSyncing(false)
     }
