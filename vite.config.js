@@ -8,7 +8,10 @@ export default defineConfig({
     port: 5000,
     allowedHosts: true,
     hmr: { clientPort: 443 },
-    watch: { ignored: ['**/.local/**', '**/.cache/**', '**/.agents/**'] },
+    watch: { ignored: ['**/.local/**', '**/.cache/**', '**/.agents/**', '**/server/**', '**/drizzle/**'] },
+    proxy: {
+      '/api': { target: 'http://localhost:3001', changeOrigin: true },
+    },
   },
   preview: {
     host: '0.0.0.0',

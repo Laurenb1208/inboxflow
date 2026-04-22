@@ -1,30 +1,55 @@
 # InboxFlow
 
-Clickable React prototype based on Lauren Brodsky's BAIS:3400 product spec. Helps busy professionals find important emails using folders, keyword filters, and priority levels.
+Full-stack email organization web app. React + Vite frontend, Node/Express backend, Postgres via Drizzle ORM, Google OAuth + Gmail API.
 
-## Stack
-- React 18 + Vite 5
-- React Router 6 (Landing + Settings)
-- Data persisted to browser `localStorage` (no backend)
+## Architecture
 
-## Pages
-- `/` — Landing page (hero, features, how-it-works, why, product-goal metrics, testimonials, CTA, footer)
-- `/settings` — InboxFlow Settings dashboard (Folders, Filters & Rules, Priority Tags, Save/Reset) with right-side modals for Create/Edit Folder and Create/Edit Filter
+- **Frontend**: React 18 + Vite, served on port 5000 in dev. Routes: `/`, `/login`, `/inbox`, `/settings`, `/pricing`, `/about`, `/contact`, `/privacy`.
+- **Backend**: Express on port 3001 in dev (Vite proxies `/api` → 3001). In production (`NODE_ENV=production`), Express serves the built `dist/` and listens on `PORT` (5000).
+- **DB**: Postgres via `DATABASE_URL`. Tables managed by Drizzle (`server/db/schema.js`). Sessions stored in `session` table via `connect-pg-simple`.
+- **Auth**: Google OAuth 2.0 with `gmail.readonly`, `email`, `profile`, `openid` scopes. Refresh tokens encrypted at rest with AES-256-GCM (`TOKEN_ENCRYPTION_KEY`).
+- **Sync**: Manual only. Pulls latest 100 INBOX messages per click, classifies each by user-defined keyword filters (subject + snippet + sender), stores metadata + 200-char snippet only.
 
-## Project Layout
-- `index.html` · `src/main.jsx` · `src/App.jsx` (router shell)
-- `src/pages/Landing.jsx`, `src/pages/Settings.jsx`
-- `src/components/Modal.jsx`, `FolderModal.jsx`, `FilterModal.jsx`, `Toast.jsx`
-- `src/hooks/useLocalStorage.js`
-- `src/data/defaults.js` (colors, priorities, sample folders/filters)
-- `src/styles.css` (design tokens + all component styles)
-- `vite.config.js` (host 0.0.0.0, port 5000, allowedHosts: true)
+## Commands
 
-## Running
-- Dev: workflow "Frontend" runs `npm run dev` on port 5000
-- Build: `npm run build` → outputs `dist/`
-- Deployment: configured static, builds with `npm run build`, serves `dist/`
+- `npm run dev` — runs API (`node --watch server/index.js`) and Vite together via concurrently.
+- `npm run build` — builds frontend to `dist/`.
+- `npm start` — production: `NODE_ENV=production node server/index.js`.
+- `npm run db:push` — pushes Drizzle schema to Postgres.
 
-## Notes
-- Front-end-only per the prototype spec. The companion spec for full Gmail OAuth/sync backend was not implemented because it requires Google OAuth credentials and a database — can be added on request.
-- Reference image preserved at `public/assets/prototype-reference.png`.
+## Required secrets
+
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google OAuth Web client.
+- `SESSION_SECRET` — random string for cookie signing.
+- `TOKEN_ENCRYPTION_KEY` — 32 raw bytes, base64-encoded.
+- `DATABASE_URL` — provided by Replit Postgres.
+
+## Google OAuth setup (one-time)
+
+In Google Cloud Console → APIs & Services → Credentials → your OAuth client, add this **Authorized redirect URI**:
+- Dev: `https://<dev-domain>/api/auth/google/callback`
+- Prod: `https://<your-app>.replit.app/api/auth/google/callback` (after publish)
+
+Then add the scope `https://www.googleapis.com/auth/gmail.readonly` to the OAuth consent screen.
+
+## Deployment
+
+Use Autoscale or Reserved VM with build = `npm run build` and run = `npm start`. (Static deployment will not work — backend is required.)
+
+## Project layout
+
+```
+server/
+  index.js              # Express bootstrap
+  auth/                 # google.js, routes.js, middleware.js
+  gmail/                # client.js, sync.js, classify.js
+  routes/               # folders, filters, settings, emails, sync, analytics
+  lib/                  # crypto.js, validate.js, redirect.js
+  db/                   # schema.js, client.js
+src/
+  App.jsx, main.jsx
+  context/Auth.jsx
+  lib/api.js
+  pages/                # Landing, Login, Inbox, Settings, Pricing, About, Contact, Privacy
+  components/           # FolderModal, FilterModal, Toast
+```

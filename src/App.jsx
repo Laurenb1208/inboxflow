@@ -1,9 +1,25 @@
-import { Routes, Route, Link, useLocation } from 'react-router-dom'
+import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom'
 import Landing from './pages/Landing.jsx'
 import Settings from './pages/Settings.jsx'
+import Login from './pages/Login.jsx'
+import Inbox from './pages/Inbox.jsx'
+import About from './pages/About.jsx'
+import Contact from './pages/Contact.jsx'
+import Privacy from './pages/Privacy.jsx'
+import Pricing from './pages/Pricing.jsx'
+import { useAuth } from './context/Auth.jsx'
+
+function Protected({ children }) {
+  const { user, loading } = useAuth()
+  if (loading) return <div className="full-loader">Loading…</div>
+  if (!user) return <Navigate to="/login" replace />
+  return children
+}
 
 export default function App() {
   const { pathname } = useLocation()
+  const { user, logout } = useAuth()
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -13,14 +29,34 @@ export default function App() {
         </Link>
         <nav className="topnav">
           <Link to="/" className={pathname === '/' ? 'active' : ''}>Home</Link>
-          <Link to="/settings" className={pathname === '/settings' ? 'active' : ''}>Settings</Link>
-          <Link to="/settings" className="btn btn-primary btn-sm">Get Started</Link>
+          <Link to="/pricing" className={pathname === '/pricing' ? 'active' : ''}>Pricing</Link>
+          <Link to="/about" className={pathname === '/about' ? 'active' : ''}>About</Link>
+          {user ? (
+            <>
+              <Link to="/inbox" className={pathname === '/inbox' ? 'active' : ''}>Inbox</Link>
+              <Link to="/settings" className={pathname === '/settings' ? 'active' : ''}>Settings</Link>
+              <button className="link-btn nav-user" onClick={logout} title={user.email}>
+                {user.picture && <img src={user.picture} alt="" className="avatar" />}
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="btn btn-primary btn-sm">Get Started</Link>
+          )}
         </nav>
       </header>
+
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/settings" element={<Protected><Settings /></Protected>} />
+        <Route path="/inbox" element={<Protected><Inbox /></Protected>} />
       </Routes>
+
       <footer className="footer">
         <div className="footer-inner">
           <div>
@@ -33,11 +69,15 @@ export default function App() {
           <div className="foot-cols">
             <div>
               <h5>Product</h5>
-              <a>Features</a><a>How it works</a><a>Pricing</a>
+              <Link to="/#features">Features</Link>
+              <Link to="/#how">How it works</Link>
+              <Link to="/pricing">Pricing</Link>
             </div>
             <div>
               <h5>Company</h5>
-              <a>About</a><a>Contact</a><a>Privacy</a>
+              <Link to="/about">About</Link>
+              <Link to="/contact">Contact</Link>
+              <Link to="/privacy">Privacy</Link>
             </div>
           </div>
         </div>
