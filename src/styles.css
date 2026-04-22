@@ -509,3 +509,54 @@ button { font-family: inherit; }
   }
   .cookie-accept { width: 100%; }
 }
+
+/* === Demo page === */
+.demo-page { padding-bottom: 60px; }
+.demo-banner {
+  background: #1e3a5f; color: white;
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  padding: 10px 20px; font-size: 14px; flex-wrap: wrap; text-align: center;
+}
+.demo-banner .btn { background: white; color: #1e3a5f; font-weight: 700; }
+.demo-banner .btn:hover { background: #e0e7ff; }
+.demo-layout {
+  display: grid; grid-template-columns: 260px 1fr; gap: 20px; margin-top: 24px;
+}
+.demo-side { padding: 16px; align-self: start; position: sticky; top: 80px; }
+.demo-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  background: #f8fafc; border-radius: 8px; padding: 10px; margin-bottom: 14px;
+}
+.ds { text-align: center; }
+.ds-val { display: block; font-size: 22px; font-weight: 800; color: var(--blue); }
+.ds-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.demo-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.dtab {
+  flex: 1; padding: 7px 0; border-radius: 6px; border: 1px solid var(--border);
+  background: none; font-size: 13px; font-family: inherit; cursor: pointer; font-weight: 500;
+}
+.dtab.on { background: var(--blue); color: white; border-color: var(--blue); font-weight: 700; }
+.dtab:hover:not(.on) { background: #f1f5f9; }
+.side-heading {
+  font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+  margin: 14px 0 6px; font-weight: 700; display: flex; align-items: center; justify-content: space-between;
+}
+.add-btn {
+  background: none; border: none; font-size: 12px; color: var(--blue);
+  cursor: pointer; font-family: inherit; font-weight: 700; padding: 0;
+}
+.add-btn:hover { text-decoration: underline; }
+.add-btn:disabled { color: var(--muted); cursor: not-allowed; }
+.manage-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px; border-radius: 6px; font-size: 13px;
+}
+.manage-row:hover { background: #f8fafc; }
+.manage-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link-btn.tiny { font-size: 11px; padding: 2px 6px; }
+.demo-main { min-width: 0; }
+
+@media (max-width: 840px) {
+  .demo-layout { grid-template-columns: 1fr; }
+  .demo-side { position: static; }
+}

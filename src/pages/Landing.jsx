@@ -36,7 +36,7 @@ export default function Landing() {
             </p>
             <div className="cta-row">
               <Link to="/login" className="btn btn-primary">Get Started</Link>
-              <a href="#how" className="btn btn-ghost">View Demo →</a>
+              <Link to="/demo" className="btn btn-ghost">View Demo →</Link>
             </div>
             <div className="trust-row">
               <span>✓ Connects to Gmail</span>
