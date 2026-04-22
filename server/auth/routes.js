@@ -65,32 +65,42 @@ router.get('/google/callback', async (req, res) => {
     console.log('[auth] Authenticated:', profile.email)
 
     // Upsert user in database
-    let user = (await db.select().from(users).where(eq(users.googleSub, profile.id)))[0]
-    if (!user) {
-      user = (await db.insert(users).values({
-        googleSub: profile.id,
-        email: profile.email,
-        name: profile.name,
-        picture: profile.picture,
-        provider: 'gmail',
-      }).returning())[0]
-      await db.insert(settings).values({ userId: user.id, autoSort: true })
-      const inserted = await db.insert(folders).values(
-        SAMPLE_FOLDERS.map(f => ({ ...f, userId: user.id }))
-      ).returning()
-      const byName = Object.fromEntries(inserted.map(f => [f.name, f.id]))
-      await db.insert(filters).values(
-        SAMPLE_FILTERS.map(f => ({
-          userId: user.id, name: f.name, keywords: f.keywords,
-          folderId: byName[f.folder], priority: f.priority, rank: f.rank,
-        }))
-      )
-      console.log('[auth] New user created:', user.email)
-    } else {
-      await db.update(users).set({
-        email: profile.email, name: profile.name, picture: profile.picture,
-      }).where(eq(users.id, user.id))
-      console.log('[auth] Existing user logged in:', user.email)
+    let user
+    try {
+      user = (await db.select().from(users).where(eq(users.googleSub, profile.id)))[0]
+      if (!user) {
+        user = (await db.insert(users).values({
+          googleSub: profile.id,
+          email: profile.email,
+          name: profile.name,
+          picture: profile.picture,
+          provider: 'gmail',
+        }).returning())[0]
+        await db.insert(settings).values({ userId: user.id, autoSort: true })
+        const inserted = await db.insert(folders).values(
+          SAMPLE_FOLDERS.map(f => ({ ...f, userId: user.id }))
+        ).returning()
+        const byName = Object.fromEntries(inserted.map(f => [f.name, f.id]))
+        await db.insert(filters).values(
+          SAMPLE_FILTERS.map(f => ({
+            userId: user.id, name: f.name, keywords: f.keywords,
+            folderId: byName[f.folder], priority: f.priority, rank: f.rank,
+          }))
+        )
+        console.log('[auth] New user created:', user.email)
+      } else {
+        await db.update(users).set({
+          email: profile.email, name: profile.name, picture: profile.picture,
+        }).where(eq(users.id, user.id))
+        console.log('[auth] Existing user logged in:', user.email)
+      }
+    } catch (e) {
+      console.error('[auth] Database error during user upsert:', e.message)
+      const isTableMissing = e.message?.includes('relation') && e.message?.includes('does not exist')
+      const friendly = isTableMissing
+        ? 'Database not initialised — run npm start to apply the schema and try again.'
+        : 'A database error occurred. Please try signing in again.'
+      return res.redirect('/login?error=' + encodeURIComponent(friendly))
     }
 
     // Store refresh token (encrypted) if present
@@ -129,7 +139,7 @@ router.get('/google/callback', async (req, res) => {
     })
   } catch (e) {
     console.error('[auth] OAuth callback unhandled error:', e)
-    res.redirect('/login?error=' + encodeURIComponent(e.message || 'unknown_error'))
+    res.redirect('/login?error=' + encodeURIComponent('Sign-in failed. Please try again.'))
   }
 })
 
