@@ -490,6 +490,42 @@ button { font-family: inherit; }
 .container.narrow { max-width: 760px; }
 .container.narrow h3 { margin-top: 28px; }
 
+/* === Login permission box === */
+.permission-box {
+  margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 16px; text-align: left; background: #f8fafc;
+}
+.perm-title {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px;
+}
+.perm-no-title { margin-top: 14px; color: var(--muted); }
+.perm-list {
+  list-style: none; padding: 0; margin: 0 0 4px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.perm-list li {
+  display: flex; gap: 8px; font-size: 13px; color: var(--text); align-items: flex-start;
+}
+.perm-yes { color: var(--green); font-weight: 700; flex-shrink: 0; line-height: 1.5; }
+.perm-no  { color: var(--muted); font-weight: 700; flex-shrink: 0; line-height: 1.5; }
+.perm-footer {
+  font-size: 12px; color: var(--muted); margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--border); line-height: 1.6;
+}
+.perm-footer a { color: var(--blue); text-decoration: underline; }
+
+/* === Contact email banner === */
+.contact-email-banner {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--blue-50); border: 1px solid #dbeafe; border-radius: var(--radius-sm);
+  padding: 14px 18px; margin-bottom: 24px; font-size: 14px; color: var(--text);
+}
+.contact-email-link {
+  color: var(--blue); font-weight: 700; text-decoration: underline;
+}
+.contact-email-link:hover { color: var(--blue-600); }
+
 /* === Cookie consent banner === */
 .cookie-banner {
   position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 1000;

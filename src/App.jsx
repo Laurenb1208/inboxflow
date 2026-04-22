@@ -115,14 +115,19 @@ export default function App() {
               <Link to="/#features">Features</Link>
               <Link to="/#how">How it works</Link>
               <Link to="/pricing">Pricing</Link>
+              <Link to="/demo">Demo</Link>
             </div>
             <div>
               <h5>Company</h5>
               <Link to="/about">About</Link>
               <Link to="/contact">Contact</Link>
-              <Link to="/privacy">Privacy</Link>
+              <a href="mailto:support@inboxflow.app">support@inboxflow.app</a>
+            </div>
+            <div>
+              <h5>Legal</h5>
+              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/terms">Terms &amp; Conditions</Link>
               <Link to="/cookie-policy">Cookie Policy</Link>
-              <Link to="/terms">Terms</Link>
             </div>
           </div>
         </div>

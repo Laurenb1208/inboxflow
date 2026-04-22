@@ -9,7 +9,19 @@ export default function Contact() {
     <main className="section">
       <div className="container narrow">
         <h1 className="section-title left">Contact us</h1>
-        <p className="lead">Questions, feedback, or partnership ideas? Drop us a note.</p>
+        <p className="lead">Questions, feedback, data requests, or privacy concerns? We'd love to hear from you.</p>
+
+        <div className="contact-email-banner">
+          <span>📧</span>
+          <span>
+            Reach us directly at{' '}
+            <a href="mailto:support@inboxflow.app" className="contact-email-link">
+              support@inboxflow.app
+            </a>
+            {' '}— we aim to respond within 2 business days.
+          </span>
+        </div>
+
         {sent ? (
           <div className="card" style={{ padding: 24 }}>
             <h3>Thanks, {form.name || 'there'} 👋</h3>

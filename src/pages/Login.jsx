@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/Auth.jsx'
 
 export default function Login() {
@@ -20,7 +21,9 @@ export default function Login() {
         </div>
         <h1>Sign in to continue</h1>
         <p className="muted">Connect your Gmail account to start organizing your inbox.</p>
-        {error && <div className="error">Sign-in failed: {error}</div>}
+
+        {error && <div className="error">Sign-in failed: {decodeURIComponent(error)}</div>}
+
         <a href="/api/auth/google" className="btn btn-google btn-block">
           <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8a12 12 0 1 1 0-24c3 0 5.7 1.1 7.8 3l5.7-5.7A20 20 0 1 0 24 44c11 0 20-8 20-20 0-1.3-.1-2.3-.4-3.5z"/>
@@ -30,10 +33,36 @@ export default function Login() {
           </svg>
           Sign in with Google
         </a>
-        <p className="muted small">
-          🔒 InboxFlow only requests permission to read email metadata for organization.
-          We never send replies or replace your email provider.
-        </p>
+
+        <div className="permission-box">
+          <div className="perm-title">🔒 What InboxFlow accesses</div>
+          <ul className="perm-list">
+            <li>
+              <span className="perm-yes">✓</span>
+              <span><strong>Your name, email, and profile picture</strong> — to identify your account</span>
+            </li>
+            <li>
+              <span className="perm-yes">✓</span>
+              <span><strong>Gmail inbox metadata</strong> — sender, subject, date, and a short snippet (~200 chars) of up to 100 messages, used to apply your folder and filter rules</span>
+            </li>
+          </ul>
+          <div className="perm-title perm-no-title">✗ What InboxFlow never accesses</div>
+          <ul className="perm-list">
+            <li><span className="perm-no">✗</span><span>Full email body text or attachments</span></li>
+            <li><span className="perm-no">✗</span><span>Sent mail, drafts, or any folder other than Inbox</span></li>
+            <li><span className="perm-no">✗</span><span>Ability to send, reply, or modify any email</span></li>
+            <li><span className="perm-no">✗</span><span>Your data is never sold or shared with third parties</span></li>
+          </ul>
+          <p className="perm-footer">
+            By signing in you agree to our{' '}
+            <Link to="/terms">Terms</Link> and{' '}
+            <Link to="/privacy">Privacy Policy</Link>.
+            You can revoke access anytime from your{' '}
+            <a href="https://myaccount.google.com/permissions" target="_blank" rel="noreferrer">
+              Google Account settings
+            </a>.
+          </p>
+        </div>
       </div>
     </main>
   )

@@ -34,7 +34,13 @@ export default function Inbox() {
       const r = await api.post('/api/sync')
       await loadEmails()
       alert(`Synced ${r.fetched} emails (${r.classified} categorized)`)
-    } catch (e) { setError('Sync failed: ' + e.message) } finally { setSyncing(false) }
+    } catch (e) {
+      if (e.body?.error === 'gmail_scope_missing') {
+        setError(e.body.message + ' Use the "Sign out" link in the top menu.')
+      } else {
+        setError('Sync failed: ' + e.message)
+      }
+    } finally { setSyncing(false) }
   }
 
   const toggleImportant = async (e) => {
