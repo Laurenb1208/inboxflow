@@ -8,7 +8,7 @@ import FilterModal from '../components/FilterModal.jsx'
 import Toast from '../components/Toast.jsx'
 
 export default function Settings() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [folders, setFolders] = useState([])
   const [filters, setFilters] = useState([])
@@ -114,8 +114,8 @@ export default function Settings() {
             </a>
           </div>
           <div className="bar-center">
-            <h1>InboxFlow Settings <span className="check">✓</span></h1>
-            <div className="connected">— Connected to Gmail{user?.email ? ` (${user.email})` : ''}</div>
+            <h1>InboxFlow Settings</h1>
+            <GmailStatus loading={authLoading} user={user} />
           </div>
           <div className="bar-right">
             <button className="link-btn" onClick={() => navigate('/inbox')}>View inbox →</button>
@@ -244,6 +244,34 @@ export default function Settings() {
       />
       <Toast message={toast} onDone={() => setToast('')} />
     </main>
+  )
+}
+
+function GmailStatus({ loading, user }) {
+  if (loading) {
+    return (
+      <div className="gmail-status checking">
+        <span className="gs-dot" />
+        <span className="gs-text">Checking connection…</span>
+      </div>
+    )
+  }
+  if (user?.connected) {
+    return (
+      <div className="gmail-status connected">
+        <span className="gs-dot" />
+        <span className="gs-text">Connected to Gmail{user.email ? ` · ${user.email}` : ''}</span>
+      </div>
+    )
+  }
+  return (
+    <div className="gmail-status disconnected">
+      <span className="gs-dot" />
+      <span className="gs-text">
+        Not connected —{' '}
+        <a href="/api/auth/google" className="gs-link">Sign in again</a>
+      </span>
+    </div>
   )
 }
 

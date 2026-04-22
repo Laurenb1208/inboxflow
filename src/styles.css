@@ -230,6 +230,19 @@ button { font-family: inherit; }
 .bar-center h1 { margin: 0; font-size: 22px; display: inline-flex; align-items: center; gap: 8px; }
 .check { color: var(--green); font-size: 18px; }
 .connected { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+.gmail-status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin-top: 4px; }
+.gs-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.gmail-status.connected .gs-dot { background: var(--green); box-shadow: 0 0 0 2px #dcfce7; }
+.gmail-status.connected .gs-text { color: var(--muted); }
+.gmail-status.disconnected .gs-dot { background: #ef4444; box-shadow: 0 0 0 2px #fee2e2; }
+.gmail-status.disconnected .gs-text { color: #b91c1c; font-weight: 500; }
+.gmail-status.checking .gs-dot { background: #d1d5db; animation: pulse-dot 1.4s ease-in-out infinite; }
+.gmail-status.checking .gs-text { color: var(--muted); }
+.gs-link { color: var(--primary); text-decoration: underline; font-weight: 500; }
+.gs-link:hover { color: var(--primary-dark, #1d4ed8); }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
 .bar-right { text-align: right; }
 .unsaved { color: var(--amber); font-size: 13px; font-weight: 600; }
 
