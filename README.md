@@ -6,7 +6,7 @@ InboxFlow is a simple web app that helps users organize and quickly find importa
 InboxFlow solves the problem of crowded inboxes by automatically organizing emails into folders, filters, and priority levels. This helps users spend less time searching and more time responding to important messages.
 
 ## Features
-- Create and manage folders
+- Create and manage folders   
 - Set filters using keywords
 - Assign priority levels (High, Medium, Low)
 - Automatically sort emails
