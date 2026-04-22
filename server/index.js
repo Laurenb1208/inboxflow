@@ -92,7 +92,7 @@ app.use('/api/analytics', requireAuth, analyticsRoutes)
 if (isProd) {
   const distDir = path.join(__dirname, '..', 'dist')
   app.use(express.static(distDir))
-  app.get('*', (req, res, next) => {
+  app.get('*path', (req, res, next) => {
     if (req.path.startsWith('/api/')) return next()
     res.sendFile(path.join(distDir, 'index.html'))
   })
