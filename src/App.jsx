@@ -7,6 +7,8 @@ import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
 import Privacy from './pages/Privacy.jsx'
 import Pricing from './pages/Pricing.jsx'
+import CookiePolicy from './pages/CookiePolicy.jsx'
+import CookieBanner from './components/CookieBanner.jsx'
 import { useAuth } from './context/Auth.jsx'
 
 function Protected({ children }) {
@@ -52,6 +54,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
         <Route path="/login" element={<Login />} />
         <Route path="/settings" element={<Protected><Settings /></Protected>} />
         <Route path="/inbox" element={<Protected><Inbox /></Protected>} />
@@ -78,11 +81,13 @@ export default function App() {
               <Link to="/about">About</Link>
               <Link to="/contact">Contact</Link>
               <Link to="/privacy">Privacy</Link>
+              <Link to="/cookie-policy">Cookie Policy</Link>
             </div>
           </div>
         </div>
         <div className="footer-bottom">© 2026 InboxFlow · Prototype</div>
       </footer>
+      <CookieBanner />
     </div>
   )
 }
