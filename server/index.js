@@ -14,7 +14,8 @@ import syncRoutes from './routes/sync.js'
 import analyticsRoutes from './routes/analytics.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const isProd = process.env.NODE_ENV === 'production'
+// Consider production if NODE_ENV is set OR if Azure's PORT env var is present
+const isProd = process.env.NODE_ENV === 'production' || !!process.env.PORT
 
 // ── Startup environment check ──────────────────────────────────────────────
 const REQUIRED_VARS = ['DATABASE_URL', 'SESSION_SECRET', 'TOKEN_ENCRYPTION_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
@@ -97,9 +98,10 @@ if (isProd) {
   })
 }
 
-// Always listen on 0.0.0.0 so both IPv4 (127.0.0.1) and IPv6 (::1) work.
-// In dev the Vite proxy targets 127.0.0.1:3001 — 0.0.0.0 covers that.
-const PORT = isProd ? parseInt(process.env.PORT || '5000', 10) : 3001
+// Always read PORT from the environment first — Azure injects process.env.PORT
+// dynamically and will fail health checks if the app binds to any other port.
+// Fall back to 3001 only when no PORT env var is present (local dev).
+const PORT = parseInt(process.env.PORT || '3001', 10)
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`[inboxflow] API listening on 0.0.0.0:${PORT} (${process.env.NODE_ENV || 'development'})`)

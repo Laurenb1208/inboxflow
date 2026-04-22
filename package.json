@@ -3,12 +3,16 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "node --watch server/index.js",
     "dev:web": "vite",
     "build": "vite build",
-    "start": "NODE_ENV=production node server/index.js",
+    "postinstall": "npm run build || true",
+    "start": "node server/index.js",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
