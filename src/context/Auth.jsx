@@ -8,12 +8,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(async () => {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 8000)
     try {
-      const { user } = await api.get('/api/auth/me')
+      const { user } = await api.get('/api/auth/me', { signal: controller.signal })
       setUser(user)
     } catch {
       setUser(null)
     } finally {
+      clearTimeout(timer)
       setLoading(false)
     }
   }, [])
