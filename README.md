@@ -15,7 +15,7 @@ InboxFlow solves the problem of crowded inboxes by automatically organizing emai
 ## Goal
 The goal of InboxFlow is to make important emails easy to find, reduce missed tasks, and improve productivity.
 
-## Tech
+## Tech    
 - Frontend: React / HTML / CSS
 - Data stored locally (prototype)
 
