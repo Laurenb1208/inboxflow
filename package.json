@@ -11,8 +11,8 @@
     "dev:api": "node --watch server/index.js",
     "dev:web": "vite",
     "build": "vite build",
-    "postinstall": "npm run build || true",
-    "start": "npx drizzle-kit push --force && node server/index.js",
+    "prestart": "node_modules/.bin/drizzle-kit push --force || echo '[inboxflow] WARNING: schema push failed - check DATABASE_URL'",
+    "start": "node server/index.js",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
