@@ -35,8 +35,8 @@ export default function Landing() {
               keyword filters, and priority levels — so you spend less time digging and more time doing.
             </p>
             <div className="cta-row">
-              <Link to="/settings" className="btn btn-primary">Get Started</Link>
-              <Link to="/settings" className="btn btn-ghost">View Demo →</Link>
+              <Link to="/login" className="btn btn-primary">Get Started</Link>
+              <a href="#how" className="btn btn-ghost">View Demo →</a>
             </div>
             <div className="trust-row">
               <span>✓ Connects to Gmail</span>
@@ -66,7 +66,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="section section-alt">
+      <section id="how" className="section section-alt">
         <div className="container">
           <h2 className="section-title">How it works</h2>
           <p className="section-sub">Three steps from chaos to calm.</p>
