@@ -24,7 +24,7 @@ export default function CookieBanner() {
   return (
     <div className="cookie-banner" role="dialog" aria-live="polite" aria-label="Cookie consent">
       <p className="cookie-text">
-        This website uses cookies to improve your experience and analyze site traffic.{' '}
+        This website uses cookies to improve your experience, store preferences, and analyze traffic.{' '}
         <Link to="/cookie-policy" className="cookie-link">Cookie Policy</Link>
       </p>
       <button className="btn btn-primary btn-sm cookie-accept" onClick={accept}>

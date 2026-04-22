@@ -1,0 +1,145 @@
+Implement the following features to meet all rubric requirements for cookie popup, cookie policy, privacy policy, terms & conditions, and favicon.
+
+---
+
+1. COOKIE CONSENT POPUP
+
+- Show a cookie banner when a user first visits the site
+- Place it at the bottom of the screen
+- Include text:
+
+"This website uses cookies to improve your experience, store preferences, and analyze traffic."
+
+- Include:
+  - "Accept" button
+  - "Cookie Policy" link that navigates to /cookie-policy
+
+- Functionality:
+  - When "Accept" is clicked:
+    - Hide the popup
+    - Store consent in localStorage (cookieConsent = true)
+  - On future visits:
+    - Do NOT show popup again
+
+- Ensure:
+  - The link works correctly
+  - Accepting clears the popup immediately
+
+---
+
+2. COOKIE POLICY PAGE (/cookie-policy)
+
+Create a full page with:
+
+Title: Cookie Policy
+
+Sections:
+- What are cookies
+- How InboxFlow uses cookies:
+  - Essential cookies (login/session)
+  - Preference cookies (cookie consent)
+  - Analytics cookies (Google Analytics)
+- How users can control cookies
+- Contact information
+
+Make the page:
+- Clean and readable
+- Proper headings (H1, H2)
+- Responsive
+
+---
+
+3. PRIVACY POLICY PAGE (/privacy)
+
+Create a full page with:
+
+Title: Privacy Policy
+
+Include:
+
+- What data is collected:
+  - Google account info (name, email)
+  - Gmail metadata (sender, subject, snippet, timestamp)
+
+- What is NOT collected:
+  - Full email bodies
+  - Attachments
+  - Ability to send emails
+
+- How data is used:
+  - Organizing emails into folders and priorities
+
+- Security:
+  - Tokens encrypted
+  - Secure sessions
+
+- User control:
+  - Users can disconnect Google anytime
+
+---
+
+4. TERMS & CONDITIONS PAGE (/terms)
+
+Create a full page with:
+
+Title: Terms & Conditions
+
+Include:
+
+- Description of service (InboxFlow email organization tool)
+- User responsibilities
+- No guarantee of accuracy
+- Limitation of liability
+- Use of third-party services (Google Gmail API)
+- Changes to terms
+- Contact information
+
+---
+
+5. FOOTER LINKS
+
+Ensure the footer includes working links to:
+- Privacy → /privacy
+- Cookie Policy → /cookie-policy
+- Terms → /terms
+
+All links must:
+- Navigate correctly
+- Work on all pages
+
+---
+
+6. FAVICON
+
+- Add a favicon to the website
+- It should appear in the browser tab
+- Use a simple icon (can be letter "I" or envelope icon)
+- Ensure it loads correctly
+
+---
+
+7. ACCESSIBILITY + VALIDATION
+
+- Use proper HTML structure (headings, paragraphs)
+- Ensure readable font size and contrast
+- Pages should be responsive
+- Follow basic HTML5 + CSS3 standards
+
+---
+
+8. DO NOT BREAK EXISTING FEATURES
+
+- Keep all current app functionality working
+- Do not remove Gmail integration or dashboard
+
+---
+
+After implementing, confirm:
+
+- Cookie popup appears on first visit
+- Accept button removes popup and stores consent
+- Cookie policy link works
+- Privacy page works
+- Terms page works
+- Footer links work on all pages
+- Favicon appears in browser tab
