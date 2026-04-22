@@ -10,7 +10,17 @@ export default defineConfig({
     hmr: { clientPort: 443 },
     watch: { ignored: ['**/.local/**', '**/.cache/**', '**/.agents/**', '**/server/**', '**/drizzle/**'] },
     proxy: {
-      '/api': { target: 'http://localhost:3001', changeOrigin: true },
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const host = req.headers['host'] || ''
+            proxyReq.setHeader('x-forwarded-host', host)
+            proxyReq.setHeader('x-forwarded-proto', 'https')
+          })
+        },
+      },
     },
   },
   preview: {
