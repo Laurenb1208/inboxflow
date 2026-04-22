@@ -6,16 +6,49 @@ import Toast from '../components/Toast.jsx'
 import { COLORS } from '../data/defaults.js'
 
 const SAMPLE_EMAILS = [
-  { id: 'e1',  fromName: 'Sara Johnson',    fromAddr: 'sara@company.com',   subject: 'Zoom link — Q2 sync',            snippet: 'Hey team, here is the Zoom link for our Q2 planning call tomorrow at 2 PM.',  receivedAt: '2026-04-22T14:00:00Z' },
-  { id: 'e2',  fromName: 'Legal @ Acme',    fromAddr: 'legal@acme.co',      subject: 'Updated contract draft',         snippet: 'Please review the attached contract proposal and let us know your thoughts.',   receivedAt: '2026-04-22T13:30:00Z' },
-  { id: 'e3',  fromName: 'HR Team',         fromAddr: 'hr@company.com',     subject: 'FYI: office closure Friday',     snippet: 'Just an update — the office will be closed this Friday for maintenance.',      receivedAt: '2026-04-22T12:00:00Z' },
-  { id: 'e4',  fromName: 'Marcus Lee',      fromAddr: 'lead@partner.io',    subject: 'Calendar invite — kickoff',     snippet: 'Sending over a calendar invite for the project kickoff meeting next Monday.',   receivedAt: '2026-04-22T11:00:00Z' },
-  { id: 'e5',  fromName: 'Priya Nair',      fromAddr: 'priya@company.com',  subject: 'Quick update on Q3 goals',      snippet: 'Team update: we have finalized the Q3 roadmap. See attached for details.',      receivedAt: '2026-04-22T10:30:00Z' },
-  { id: 'e6',  fromName: 'TechCorp Sales',  fromAddr: 'sales@techcorp.com', subject: 'New proposal for your review',  snippet: 'We would love to discuss this proposal with you — let us know your availability.', receivedAt: '2026-04-22T09:00:00Z' },
-  { id: 'e7',  fromName: 'Alex Kim',        fromAddr: 'alex@company.com',   subject: 'FYI — policy change',            snippet: 'A quick FYI: the expense reimbursement policy has been updated effective May 1.',  receivedAt: '2026-04-21T17:00:00Z' },
-  { id: 'e8',  fromName: 'Client Success',  fromAddr: 'cs@bigclient.com',   subject: 'Contract renewal discussion',   snippet: 'Our contract is up for renewal next month. Can we schedule a call this week?',  receivedAt: '2026-04-21T15:00:00Z' },
-  { id: 'e9',  fromName: 'Jamie Torres',    fromAddr: 'jamie@company.com',  subject: 'Zoom standup notes',             snippet: 'Notes from today\'s standup are attached. Action items highlighted in yellow.',   receivedAt: '2026-04-21T14:00:00Z' },
-  { id: 'e10', fromName: 'Newsletter',      fromAddr: 'news@digest.com',    subject: 'Your weekly industry digest',   snippet: 'This week in tech: AI tools, remote work trends, and SaaS funding news.',        receivedAt: '2026-04-21T08:00:00Z' },
+  // ── MEETINGS (match: zoom, calendar, invite, meeting, reschedule) ── High priority
+  { id: 'e1',  fromName: 'Sara Johnson',       fromAddr: 'sara@company.com',        subject: 'Zoom link — Q2 planning sync',           snippet: 'Here is the Zoom link for our Q2 planning call tomorrow at 2 PM. Please join 5 min early.',              receivedAt: '2026-04-22T14:00:00Z' },
+  { id: 'e2',  fromName: 'Marcus Lee',         fromAddr: 'lead@partner.io',         subject: 'Calendar invite: project kickoff',         snippet: 'Sending over a calendar invite for the project kickoff meeting next Monday at 10 AM.',                   receivedAt: '2026-04-22T11:00:00Z' },
+  { id: 'e3',  fromName: 'Jamie Torres',       fromAddr: 'jamie@company.com',       subject: 'Zoom standup notes — Apr 22',              snippet: 'Notes from today\'s standup are attached. Action items highlighted. Next meeting is Thursday.',             receivedAt: '2026-04-22T09:30:00Z' },
+  { id: 'e4',  fromName: 'Amanda Chen',        fromAddr: 'amanda@company.com',      subject: 'Meeting invite: product roadmap review',   snippet: 'Please accept this meeting invite for the product roadmap review on Friday at 1 PM.',                    receivedAt: '2026-04-21T16:00:00Z' },
+  { id: 'e5',  fromName: 'David Park',         fromAddr: 'dpark@company.com',       subject: 'Rescheduled: leadership sync → Thursday',  snippet: 'Our leadership sync has been rescheduled from Wednesday to Thursday at 3 PM. Calendar updated.',           receivedAt: '2026-04-21T14:30:00Z' },
+  { id: 'e6',  fromName: 'Operations Team',    fromAddr: 'ops@company.com',         subject: 'All-hands meeting tomorrow at 3 PM',       snippet: 'Reminder: all-hands meeting is tomorrow at 3 PM in the main conference room. Zoom link in calendar.',     receivedAt: '2026-04-21T10:00:00Z' },
+  { id: 'e7',  fromName: 'Raj Patel',          fromAddr: 'raj@company.com',         subject: 'Invite: sprint planning — please confirm', snippet: 'Please accept this invite for our sprint planning session on Monday at 9 AM. Zoom link attached.',          receivedAt: '2026-04-20T15:00:00Z' },
+  { id: 'e8',  fromName: 'Lisa Wong',          fromAddr: 'lisa@company.com',        subject: 'Weekly team meeting notes — Apr 21',       snippet: 'Here are the notes from yesterday\'s weekly team meeting. Decisions and follow-up actions listed inside.',  receivedAt: '2026-04-20T09:00:00Z' },
+  { id: 'e9',  fromName: 'Ben Walker',         fromAddr: 'ben@agency.com',          subject: 'Zoom link for design review this Friday',  snippet: 'I\'ll send the Zoom link for the design review call. Can you confirm Friday at 11 AM still works?',         receivedAt: '2026-04-18T13:00:00Z' },
+  { id: 'e10', fromName: 'Caroline Nash',      fromAddr: 'caroline@company.com',    subject: 'Reschedule request: Monday standup',       snippet: 'Hey, would it be possible to reschedule Monday\'s standup to 9 AM instead of 10? Calendar invite updated.', receivedAt: '2026-04-17T17:30:00Z' },
+
+  // ── CLIENTS (match: contract, proposal, invoice, deliverable, follow-up) ── Medium priority
+  { id: 'e11', fromName: 'Legal @ Acme',       fromAddr: 'legal@acme.co',           subject: 'Updated contract draft for review',        snippet: 'Please review the attached contract draft and let us know if you have any revisions before signing.',      receivedAt: '2026-04-22T13:30:00Z' },
+  { id: 'e12', fromName: 'TechCorp Sales',     fromAddr: 'sales@techcorp.com',      subject: 'New proposal for your review',             snippet: 'Attached is the revised proposal with updated pricing. Let us know your availability to discuss.',          receivedAt: '2026-04-22T09:00:00Z' },
+  { id: 'e13', fromName: 'Client Success',     fromAddr: 'cs@bigclient.com',        subject: 'Contract renewal — can we schedule a call?', snippet: 'Our contract is up for renewal next month. I\'d love to schedule a call to discuss terms this week.',      receivedAt: '2026-04-21T15:00:00Z' },
+  { id: 'e14', fromName: 'GlobalVentures',     fromAddr: 'billing@globalv.com',     subject: 'Invoice #4421 attached for approval',      snippet: 'Please find Invoice #4421 for Q1 services attached. Kindly approve for payment within 14 days.',           receivedAt: '2026-04-21T11:00:00Z' },
+  { id: 'e15', fromName: 'Kate Reynolds',      fromAddr: 'kreynolds@mediaco.com',   subject: 'Deliverable checklist — Q2 campaign',      snippet: 'Sharing the final deliverable checklist for the Q2 campaign. Please confirm which items are in scope.',      receivedAt: '2026-04-20T14:00:00Z' },
+  { id: 'e16', fromName: 'Zoe Hammond',        fromAddr: 'zoe@partnerco.com',       subject: 'Follow-up: expansion discussion',          snippet: 'Following up on our call last week regarding the potential expansion into the EU market. Let me know.',      receivedAt: '2026-04-20T11:30:00Z' },
+  { id: 'e17', fromName: 'Meridian Partners',  fromAddr: 'hello@meridian.io',       subject: 'Proposal feedback — we\'re ready to move forward', snippet: 'We\'ve reviewed your proposal and are ready to move forward. Can we get a revised contract by Friday?',  receivedAt: '2026-04-19T16:00:00Z' },
+  { id: 'e18', fromName: 'Enterprise Solutions', fromAddr: 'accounts@entsol.com',   subject: 'Revised proposal — new pricing model',    snippet: 'Please find the revised proposal with our new pricing model attached. Open to a call to walk you through it.', receivedAt: '2026-04-18T10:00:00Z' },
+  { id: 'e19', fromName: 'Horizon Group',      fromAddr: 'contracts@horizon.biz',   subject: 'Contract terms — final round of edits',   snippet: 'We are on the last round of contract edits. Attached is the redlined version with our legal team\'s notes.',  receivedAt: '2026-04-17T14:00:00Z' },
+  { id: 'e20', fromName: 'ClientCo Billing',   fromAddr: 'billing@clientco.com',    subject: 'Invoice #887 — please review',             snippet: 'Your invoice #887 is ready. Total due: $4,200. Please review and let us know if you have any questions.',    receivedAt: '2026-04-16T09:00:00Z' },
+
+  // ── INTERNAL (match: update, FYI, internal, team, reminder) ── Low priority
+  { id: 'e21', fromName: 'HR Team',            fromAddr: 'hr@company.com',          subject: 'FYI: office closed Friday',                snippet: 'Just an update — the office will be closed this Friday for scheduled maintenance. Work from home.',          receivedAt: '2026-04-22T12:00:00Z' },
+  { id: 'e22', fromName: 'Priya Nair',         fromAddr: 'priya@company.com',       subject: 'Update: Q3 goals finalized',               snippet: 'Team update: the Q3 roadmap has been finalized. Please review the shared doc and add your OKRs by EOD.',     receivedAt: '2026-04-22T10:30:00Z' },
+  { id: 'e23', fromName: 'Alex Kim',           fromAddr: 'alex@company.com',        subject: 'FYI — expense policy change May 1',        snippet: 'A quick FYI: the expense reimbursement policy has been updated effective May 1. See attached PDF.',             receivedAt: '2026-04-21T17:00:00Z' },
+  { id: 'e24', fromName: 'Engineering Team',   fromAddr: 'eng@company.com',         subject: 'Internal: deployment Saturday night',      snippet: 'Internal notice: we are deploying v2.4 Saturday at 11 PM. Expect up to 30 min of downtime for the API.',    receivedAt: '2026-04-21T13:00:00Z' },
+  { id: 'e25', fromName: 'All-Hands',          fromAddr: 'allhands@company.com',    subject: 'Reminder: submit Q2 OKR updates by EOD',  snippet: 'Team reminder — please submit your quarterly OKR updates in the shared tracker by 5 PM today. Thank you!',   receivedAt: '2026-04-20T08:00:00Z' },
+  { id: 'e26', fromName: 'IT Support',         fromAddr: 'it@company.com',          subject: 'Team reminder: 2FA required from Monday',  snippet: 'Friendly reminder: two-factor authentication becomes mandatory for all team members starting this Monday.',    receivedAt: '2026-04-19T11:00:00Z' },
+  { id: 'e27', fromName: 'Finance',            fromAddr: 'finance@company.com',     subject: 'FYI: expense window closes Friday',        snippet: 'Internal FYI — the Q1 expense reimbursement submission window closes this Friday at 5 PM. Submit now.',       receivedAt: '2026-04-18T09:30:00Z' },
+  { id: 'e28', fromName: 'Marketing Team',     fromAddr: 'marketing@company.com',   subject: 'Internal update: new brand guidelines',   snippet: 'Team update: the new brand guidelines are published on Notion. Please review before creating new materials.',   receivedAt: '2026-04-17T10:00:00Z' },
+
+  // ── UNCATEGORIZED (no keyword match) ──
+  { id: 'e29', fromName: 'Amazon',             fromAddr: 'ship-confirm@amazon.com', subject: 'Your order has shipped — arrives tomorrow', snippet: 'Good news! Your order of "Mechanical Keyboard Pro" has shipped and arrives tomorrow by 8 PM.',               receivedAt: '2026-04-22T08:00:00Z' },
+  { id: 'e30', fromName: 'GitHub',             fromAddr: 'noreply@github.com',      subject: 'Security alert on your repository',        snippet: 'A dependency in your repository has a known vulnerability. Review the Dependabot alert and apply the fix.',   receivedAt: '2026-04-22T07:30:00Z' },
+  { id: 'e31', fromName: 'Weekly Digest',      fromAddr: 'news@techdigest.com',     subject: 'Your weekly industry digest',              snippet: 'This week in tech: AI tools, remote work trends, SaaS funding rounds, and the top reads from the community.',  receivedAt: '2026-04-21T08:00:00Z' },
+  { id: 'e32', fromName: 'LinkedIn',           fromAddr: 'messaging@linkedin.com',  subject: '3 new connections are looking at you',    snippet: 'You have 3 new profile views and 2 pending connection requests. Log in to see who wants to connect.',          receivedAt: '2026-04-20T16:00:00Z' },
+  { id: 'e33', fromName: 'Stripe',             fromAddr: 'reports@stripe.com',      subject: 'Weekly payout summary — Apr 14–21',       snippet: 'Your weekly payout of $1,240.00 has been sent to your bank account. View the full breakdown in your dashboard.',  receivedAt: '2026-04-20T07:00:00Z' },
+  { id: 'e34', fromName: 'DocuSign',           fromAddr: 'dse@docusign.net',        subject: 'Please sign: NDA for vendor onboarding',  snippet: 'You have been sent a document to sign: "Mutual NDA — Vendor Onboarding". Click to review and sign securely.',   receivedAt: '2026-04-19T14:00:00Z' },
+  { id: 'e35', fromName: 'no-reply@flights',   fromAddr: 'confirm@flightapp.com',   subject: 'Flight confirmation: ORD → JFK Apr 28',   snippet: 'Your flight UA2284 from Chicago O\'Hare to New York JFK on April 28 at 7:15 AM is confirmed. Check in opens 24h before.',  receivedAt: '2026-04-18T15:00:00Z' },
+  { id: 'e36', fromName: 'Webinar Host',       fromAddr: 'events@saasconf.com',     subject: 'You\'re registered: Growth Hacking 2026', snippet: 'You\'re confirmed for "Growth Hacking in 2026" on May 3 at 11 AM ET. A recording will be sent automatically.',        receivedAt: '2026-04-17T12:00:00Z' },
 ]
 
 const INIT_FOLDERS = [
@@ -25,9 +58,9 @@ const INIT_FOLDERS = [
 ]
 
 const INIT_FILTERS = [
-  { id: 'r1', name: 'Meetings', keywords: 'zoom, calendar', folder: 'Meetings', priority: 'High'   },
-  { id: 'r2', name: 'Clients',  keywords: 'contract, proposal', folder: 'Clients', priority: 'Medium' },
-  { id: 'r3', name: 'Internal', keywords: 'update, FYI', folder: 'Internal', priority: 'Low'    },
+  { id: 'r1', name: 'Meetings', keywords: 'zoom, calendar, invite, meeting, reschedule', folder: 'Meetings', priority: 'High'   },
+  { id: 'r2', name: 'Clients',  keywords: 'contract, proposal, invoice, deliverable, follow-up', folder: 'Clients', priority: 'Medium' },
+  { id: 'r3', name: 'Internal', keywords: 'update, FYI, internal, team, reminder', folder: 'Internal', priority: 'Low'    },
 ]
 
 function classify(email, filters, folders) {

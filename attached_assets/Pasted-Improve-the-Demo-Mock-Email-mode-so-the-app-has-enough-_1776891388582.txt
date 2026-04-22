@@ -1,0 +1,75 @@
+Improve the Demo / Mock Email mode so the app has enough realistic sample emails to clearly show every category, priority level, and key feature in the InboxFlow demo.
+
+Goals:
+- Make the demo feel full and realistic
+- Ensure something appears in every important category
+- Make it easier to present and test the app without relying on real Gmail data
+
+Tasks:
+
+1. Add more mock emails
+- Increase the demo dataset to at least 30–40 mock emails
+- Use realistic sender names, email addresses, subjects, snippets, and timestamps
+- Mix internal, client, meeting, and uncategorized emails
+
+2. Ensure each category has visible examples
+Add enough mock emails so the demo always shows emails in these categories:
+- Meetings
+- Clients
+- Internal
+- Uncategorized
+
+3. Ensure each priority level appears
+Make sure there are visible demo emails for:
+- High priority
+- Medium priority
+- Low priority
+
+4. Match the current filter logic
+Create mock emails that intentionally match the existing keyword rules, such as:
+- Meetings: zoom, calendar, invite, meeting, reschedule
+- Clients: contract, proposal, invoice, deliverable, follow-up
+- Internal: update, FYI, internal, team, reminder
+
+5. Include realistic uncategorized emails
+Add several emails that do not match any folder/filter so the Uncategorized view is useful.
+
+6. Add more variety
+Include examples like:
+- meeting invite
+- rescheduled call
+- client contract review
+- proposal feedback
+- internal team update
+- FYI reminder
+- onboarding note
+- lunch invite
+- newsletter
+- shipping notification
+- password reset
+- webinar registration
+- marketing email
+
+7. Spread timestamps realistically
+- Use a mix of today, yesterday, this week, and older recent dates
+- Make the inbox look naturally active
+
+8. Improve demo consistency
+- Ensure the analytics cards show meaningful numbers in demo mode
+- Ensure the Inbox page shows data for folder filters, priority filters, and search
+
+9. Keep demo mode separate from real Gmail mode
+- Do not affect real synced Gmail data
+- Only improve the mock/demo dataset
+
+10. Make the demo presentation-ready
+The final demo should clearly show:
+- categorized emails
+- uncategorized emails
+- different priority levels
+- a realistic inbox experience
+
+After implementing:
+- confirm how many mock emails were added
+- list how many appear in each category
+- confirm that every category and priority level has visible examples
