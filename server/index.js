@@ -17,6 +17,31 @@ import analyticsRoutes from './routes/analytics.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const isProd = process.env.NODE_ENV === 'production'
 
+// ── Startup environment check ──────────────────────────────────────────────
+const REQUIRED_VARS = ['DATABASE_URL', 'SESSION_SECRET', 'TOKEN_ENCRYPTION_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
+const OPTIONAL_VARS = ['GOOGLE_REDIRECT_URI']
+let startupOk = true
+for (const v of REQUIRED_VARS) {
+  if (!process.env[v]) {
+    console.error(`[inboxflow] MISSING required env var: ${v}`)
+    startupOk = false
+  }
+}
+for (const v of OPTIONAL_VARS) {
+  console.log(`[inboxflow] ${v}: ${process.env[v] ? process.env[v] : '(not set — will derive from request)'}`)
+}
+if (!startupOk) {
+  console.error('[inboxflow] Missing required env vars — some features will not work')
+}
+// Validate TOKEN_ENCRYPTION_KEY length (must decode to 32 bytes)
+if (process.env.TOKEN_ENCRYPTION_KEY) {
+  const keyBytes = Buffer.from(process.env.TOKEN_ENCRYPTION_KEY, 'base64').length
+  if (keyBytes !== 32) {
+    console.error(`[inboxflow] TOKEN_ENCRYPTION_KEY decoded to ${keyBytes} bytes — must be exactly 32 bytes (44 base64 chars)`)
+  }
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 // Catch unhandled errors so the process never silently dies
 process.on('uncaughtException', (err) => {
   console.error('[inboxflow] uncaughtException:', err)
