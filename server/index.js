@@ -1,7 +1,6 @@
 import express from 'express'
 import session from 'express-session'
 import ConnectPgSimple from 'connect-pg-simple'
-import cookieParser from 'cookie-parser'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { pool } from './db/client.js'
@@ -57,7 +56,6 @@ pool.on('error', (err) => {
 const app = express()
 app.set('trust proxy', 1)
 app.use(express.json({ limit: '1mb' }))
-app.use(cookieParser())
 
 const PgStore = ConnectPgSimple(session)
 app.use(session({
@@ -65,9 +63,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-only-not-secret',
   resave: false,
   saveUninitialized: false,
+  rolling: true,
   cookie: {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'none',
     secure: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   },

@@ -46,7 +46,9 @@ export default function Settings() {
   }
   const deleteFolder = async (id) => {
     if (!confirm('Delete this folder? Filters using it will be removed too.')) return
-    await api.del(`/api/folders/${id}`); await refresh(); setToast('Folder deleted')
+    try {
+      await api.del(`/api/folders/${id}`); await refresh(); setToast('Folder deleted')
+    } catch (e) { setToast(e.message) }
   }
   const saveFilter = async (data) => {
     const folder = folders.find(f => f.name === data.folder)
@@ -59,7 +61,9 @@ export default function Settings() {
     } catch (e) { setToast(e.message) }
   }
   const deleteFilter = async (id) => {
-    await api.del(`/api/filters/${id}`); await refresh(); setToast('Filter deleted')
+    try {
+      await api.del(`/api/filters/${id}`); await refresh(); setToast('Filter deleted')
+    } catch (e) { setToast(e.message) }
   }
 
   const saveAll = async () => {
