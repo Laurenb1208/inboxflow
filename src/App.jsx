@@ -31,15 +31,12 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Link to="/" className="brand">
+        <Link to={user ? '/inbox' : '/'} className="brand">
           <span className="brand-logo">📬</span>
           <span className="brand-name">InboxFlow</span>
         </Link>
 
         <nav className="topnav">
-          <Link to="/" className={pathname === '/' ? 'active' : ''}>Home</Link>
-          <Link to="/pricing" className={pathname === '/pricing' ? 'active' : ''}>Pricing</Link>
-          <Link to="/about" className={pathname === '/about' ? 'active' : ''}>About</Link>
           {user ? (
             <>
               <Link to="/inbox" className={pathname === '/inbox' ? 'active' : ''}>Inbox</Link>
@@ -50,7 +47,12 @@ export default function App() {
               </button>
             </>
           ) : (
-            <Link to="/login" className="btn btn-primary btn-sm">Get Started</Link>
+            <>
+              <Link to="/" className={pathname === '/' ? 'active' : ''}>Home</Link>
+              <Link to="/pricing" className={pathname === '/pricing' ? 'active' : ''}>Pricing</Link>
+              <Link to="/about" className={pathname === '/about' ? 'active' : ''}>About</Link>
+              <Link to="/login" className="btn btn-primary btn-sm">Sign in</Link>
+            </>
           )}
         </nav>
 
@@ -68,10 +70,6 @@ export default function App() {
 
       {menuOpen && (
         <div className="mobile-menu">
-          <Link to="/">Home</Link>
-          <Link to="/pricing">Pricing</Link>
-          <Link to="/about">About</Link>
-          <Link to="/demo">Demo</Link>
           {user ? (
             <>
               <Link to="/inbox">Inbox</Link>
@@ -81,7 +79,13 @@ export default function App() {
               </button>
             </>
           ) : (
-            <Link to="/login" className="mobile-menu-cta">Get Started</Link>
+            <>
+              <Link to="/">Home</Link>
+              <Link to="/pricing">Pricing</Link>
+              <Link to="/about">About</Link>
+              <Link to="/demo">Demo</Link>
+              <Link to="/login" className="mobile-menu-cta">Sign in</Link>
+            </>
           )}
         </div>
       )}
