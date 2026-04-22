@@ -15,6 +15,19 @@ import syncRoutes from './routes/sync.js'
 import analyticsRoutes from './routes/analytics.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const isProd = process.env.NODE_ENV === 'production'
+
+// Catch unhandled errors so the process never silently dies
+process.on('uncaughtException', (err) => {
+  console.error('[inboxflow] uncaughtException:', err)
+})
+process.on('unhandledRejection', (reason) => {
+  console.error('[inboxflow] unhandledRejection:', reason)
+})
+
+pool.on('error', (err) => {
+  console.error('[inboxflow] pg pool error:', err.message)
+})
 
 const app = express()
 app.set('trust proxy', 1)
@@ -51,7 +64,7 @@ app.use('/api/sync', requireAuth, syncRoutes)
 app.use('/api/analytics', requireAuth, analyticsRoutes)
 
 // Production: serve built frontend
-if (process.env.NODE_ENV === 'production') {
+if (isProd) {
   const distDir = path.join(__dirname, '..', 'dist')
   app.use(express.static(distDir))
   app.get('*', (req, res, next) => {
@@ -60,13 +73,18 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-const PORT = parseInt(process.env.PORT || '5000', 10)
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
-const BACKEND_PORT = process.env.NODE_ENV === 'production' ? PORT : 3001
+// Always listen on 0.0.0.0 so both IPv4 (127.0.0.1) and IPv6 (::1) work.
+// In dev the Vite proxy targets 127.0.0.1:3001 — 0.0.0.0 covers that.
+const PORT = isProd ? parseInt(process.env.PORT || '5000', 10) : 3001
 
-const listenPort = process.env.NODE_ENV === 'production' ? PORT : BACKEND_PORT
-const listenHost = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`[inboxflow] API listening on 0.0.0.0:${PORT} (${process.env.NODE_ENV || 'development'})`)
+})
 
-app.listen(listenPort, listenHost, () => {
-  console.log(`[inboxflow] API listening on ${listenHost}:${listenPort} (${process.env.NODE_ENV || 'development'})`)
+server.on('error', (err) => {
+  console.error('[inboxflow] server error:', err.message)
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[inboxflow] Port ${PORT} already in use — is another instance running?`)
+    process.exit(1)
+  }
 })
