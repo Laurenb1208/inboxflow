@@ -199,15 +199,15 @@ export default function Demo() {
             <h4 className="side-heading">Folders</h4>
             <button className={`side-item ${activeFolderId === '' ? 'on' : ''}`} onClick={() => setActiveFolderId('')}>All emails</button>
             {folders.map(f => (
-              <button key={f.id} className={`side-item ${activeFolderId === f.id ? 'on' : ''}`} onClick={() => setActiveFolderId(f.id)}>
+              <button key={f.id} className={`side-item ${activeFolderId === f.id ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === f.id ? '' : f.id)}>
                 <span className="color-dot" style={{ background: colorHex(f.color) }} /> {f.name}
               </button>
             ))}
-            <button className={`side-item ${activeFolderId === 'uncategorized' ? 'on' : ''}`} onClick={() => setActiveFolderId('uncategorized')}>Uncategorized</button>
+            <button className={`side-item ${activeFolderId === 'uncategorized' ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized')}>Uncategorized</button>
 
             <h4 className="side-heading">Priority</h4>
             {['', 'High', 'Medium', 'Low'].map(p => (
-              <button key={p || 'all'} className={`side-item ${activePriority === p ? 'on' : ''}`} onClick={() => setActivePriority(p)}>
+              <button key={p || 'all'} className={`side-item ${activePriority === p ? 'on' : ''}`} onClick={() => p === '' ? setActivePriority('') : setActivePriority(cur => cur === p ? '' : p)}>
                 {p === '' ? 'All priorities' : <><span className={`r-dot pri-${p.toLowerCase()}`} /> {p}</>}
               </button>
             ))}
