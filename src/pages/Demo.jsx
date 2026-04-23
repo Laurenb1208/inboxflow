@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import FolderModal from '../components/FolderModal.jsx'
+import Toast from '../components/Toast.jsx'
 import { COLORS } from '../data/defaults.js'
 
 // ─── Exactly 3 demo folders, 4 keywords each ──────────────────────────────
@@ -60,13 +62,20 @@ function fmtDate(iso) {
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
+let nextId = 100
+const uid = () => String(++nextId)
+
 export default function Demo() {
+  const [folders, setFolders] = useState(INIT_FOLDERS)
+  const [folderModal, setFolderModal] = useState({ open: false, initial: null })
+  const [toast, setToast] = useState('')
+  const [tab, setTab] = useState('inbox')
   const [activeFolderId, setActiveFolderId] = useState('')
   const [activePriority, setActivePriority] = useState('')
   const [q, setQ] = useState('')
   const [selected, setSelected] = useState(null)
 
-  const emails = useMemo(() => SAMPLE_EMAILS.map(e => ({ ...e, ...classify(e, INIT_FOLDERS) })), [])
+  const emails = useMemo(() => SAMPLE_EMAILS.map(e => ({ ...e, ...classify(e, folders) })), [folders])
 
   const visible = useMemo(() => emails.filter(e => {
     if (activeFolderId === 'uncategorized' && e.folderId) return false
@@ -82,10 +91,29 @@ export default function Demo() {
   const activeLabel = useMemo(() => {
     const parts = []
     if (activeFolderId === 'uncategorized') parts.push('Uncategorized')
-    else if (activeFolderId) parts.push(INIT_FOLDERS.find(f => f.id === activeFolderId)?.name || '')
+    else if (activeFolderId) parts.push(folders.find(f => f.id === activeFolderId)?.name || '')
     if (activePriority) parts.push(activePriority)
     return parts.join(' + ')
-  }, [activeFolderId, activePriority])
+  }, [activeFolderId, activePriority, folders])
+
+  const saveFolder = (data) => {
+    if (data.id) {
+      setFolders(fs => fs.map(f => f.id === data.id ? { ...f, ...data } : f))
+      setToast('Folder updated')
+    } else {
+      if (folders.some(f => f.name.toLowerCase() === data.name.toLowerCase())) {
+        setToast('A folder with that name already exists'); return
+      }
+      setFolders(fs => [...fs, { ...data, id: uid() }])
+      setToast('Folder created')
+    }
+  }
+
+  const deleteFolder = (id) => {
+    setFolders(fs => fs.filter(f => f.id !== id))
+    if (activeFolderId === id) setActiveFolderId('')
+    setToast('Folder deleted')
+  }
 
   const categorized = emails.filter(e => e.folderId).length
 
@@ -97,30 +125,60 @@ export default function Demo() {
       </div>
 
       <div className="container demo-layout">
-        {/* LEFT: sidebar — inbox filters only, no folder management */}
+        {/* LEFT: sidebar */}
         <aside className="demo-side card">
           <div className="demo-stats">
             <div className="ds"><span className="ds-val">{emails.length}</span><span className="ds-lbl">Emails</span></div>
             <div className="ds"><span className="ds-val">{categorized}</span><span className="ds-lbl">Sorted</span></div>
-            <div className="ds"><span className="ds-val">{INIT_FOLDERS.length}</span><span className="ds-lbl">Folders</span></div>
+            <div className="ds"><span className="ds-val">{folders.length}</span><span className="ds-lbl">Folders</span></div>
           </div>
 
-          <h4 className="side-heading">Folders</h4>
-          <button className={`side-item ${activeFolderId === '' ? 'on' : ''}`} onClick={() => setActiveFolderId('')}>All emails</button>
-          {INIT_FOLDERS.map(f => (
-            <button key={f.id} className={`side-item ${activeFolderId === f.id ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === f.id ? '' : f.id)}>
-              <span className="color-dot" style={{ background: colorHex(f.color) }} /> {f.name}
-            </button>
-          ))}
-          <button className={`side-item ${activeFolderId === 'uncategorized' ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized')}>Uncategorized</button>
+          <div className="demo-tabs">
+            <button className={`dtab ${tab === 'inbox' ? 'on' : ''}`} onClick={() => setTab('inbox')}>📥 Inbox</button>
+            <button className={`dtab ${tab === 'settings' ? 'on' : ''}`} onClick={() => setTab('settings')}>⚙️ Settings</button>
+          </div>
 
-          <h4 className="side-heading">Priority</h4>
-          <button className={`side-item ${activePriority === '' ? 'on' : ''}`} onClick={() => setActivePriority('')}>All priorities</button>
-          {['High', 'Medium', 'Low'].map(p => (
-            <button key={p} className={`side-item ${activePriority === p ? 'on' : ''}`} onClick={() => setActivePriority(cur => cur === p ? '' : p)}>
-              <span className={`r-dot pri-${p.toLowerCase()}`} /> {p}
-            </button>
-          ))}
+          {tab === 'inbox' && <>
+            <h4 className="side-heading">Folders</h4>
+            <button className={`side-item ${activeFolderId === '' ? 'on' : ''}`} onClick={() => setActiveFolderId('')}>All emails</button>
+            {folders.map(f => (
+              <button key={f.id} className={`side-item ${activeFolderId === f.id ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === f.id ? '' : f.id)}>
+                <span className="color-dot" style={{ background: colorHex(f.color) }} /> {f.name}
+              </button>
+            ))}
+            <button className={`side-item ${activeFolderId === 'uncategorized' ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized')}>Uncategorized</button>
+
+            <h4 className="side-heading">Priority</h4>
+            <button className={`side-item ${activePriority === '' ? 'on' : ''}`} onClick={() => setActivePriority('')}>All priorities</button>
+            {['High', 'Medium', 'Low'].map(p => (
+              <button key={p} className={`side-item ${activePriority === p ? 'on' : ''}`} onClick={() => setActivePriority(cur => cur === p ? '' : p)}>
+                <span className={`r-dot pri-${p.toLowerCase()}`} /> {p}
+              </button>
+            ))}
+          </>}
+
+          {tab === 'settings' && <>
+            <h4 className="side-heading">
+              Folders
+              <button className="add-btn" onClick={() => setFolderModal({ open: true, initial: null })}>+ Add</button>
+            </h4>
+            {folders.length === 0 && (
+              <p className="muted" style={{ fontSize: 13, padding: '8px 0' }}>No folders yet — add one to start sorting.</p>
+            )}
+            {folders.map(f => (
+              <div key={f.id}>
+                <div className="manage-row">
+                  <span className="color-dot" style={{ background: colorHex(f.color) }} />
+                  <span className="manage-name">{f.name}</span>
+                  <button className="link-btn tiny" onClick={() => setFolderModal({ open: true, initial: f })}>Edit</button>
+                  <button className="link-btn tiny danger" onClick={() => deleteFolder(f.id)}>✕</button>
+                </div>
+                {f.keywords && (
+                  <p className="muted" style={{ fontSize: 11, margin: '0 0 6px 20px' }}>{f.keywords}</p>
+                )}
+              </div>
+            ))}
+          </>}
         </aside>
 
         {/* MAIN: email list */}
@@ -192,6 +250,14 @@ export default function Demo() {
           </div>
         </div>
       )}
+
+      <FolderModal
+        open={folderModal.open}
+        initial={folderModal.initial}
+        onClose={() => setFolderModal({ open: false, initial: null })}
+        onSave={saveFolder}
+      />
+      <Toast message={toast} onDone={() => setToast('')} />
     </main>
   )
 }
