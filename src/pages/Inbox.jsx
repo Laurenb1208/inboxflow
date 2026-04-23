@@ -5,7 +5,6 @@ export default function Inbox() {
   const [folders, setFolders] = useState([])
   const [emails, setEmails] = useState([])
   const [folderId, setFolderId] = useState('')
-  const [priority, setPriority] = useState('')
   const [q, setQ] = useState('')
   const [selected, setSelected] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -19,13 +18,12 @@ export default function Inbox() {
     try {
       const params = new URLSearchParams()
       if (folderId) params.set('folderId', folderId)
-      if (priority) params.set('priority', priority)
       if (q) params.set('q', q)
       setEmails(await api.get('/api/emails?' + params.toString()))
     } catch (e) { setError(e.message) } finally { setLoading(false) }
   }
   useEffect(() => { loadFolders() }, [])
-  useEffect(() => { loadEmails() }, [folderId, priority])
+  useEffect(() => { loadEmails() }, [folderId])
   useEffect(() => { const t = setTimeout(loadEmails, 250); return () => clearTimeout(t) }, [q])
 
   const sync = async () => {
@@ -52,7 +50,6 @@ export default function Inbox() {
   const activeFilterLabel = () => {
     if (folderId === 'uncategorized') return 'Uncategorized'
     if (folderId) return folders.find(f => f.id === folderId)?.name || 'Folder'
-    if (priority) return priority + ' priority'
     return 'All emails'
   }
 
@@ -69,20 +66,11 @@ export default function Inbox() {
           <h4>Folders</h4>
           <button className={`side-item ${folderId === '' ? 'on' : ''}`} onClick={() => { setFolderId(''); setSideOpen(false) }}>All emails</button>
           {folders.map(f => (
-            <button key={f.id} className={`side-item ${folderId === f.id ? 'on' : ''}`} onClick={() => { setFolderId(f.id); setSideOpen(false) }}>
+            <button key={f.id} className={`side-item ${folderId === f.id ? 'on' : ''}`} onClick={() => { setFolderId(cur => cur === f.id ? '' : f.id); setSideOpen(false) }}>
               <span className="color-dot" /> {f.name}
             </button>
           ))}
-          <button className={`side-item ${folderId === 'uncategorized' ? 'on' : ''}`} onClick={() => { setFolderId('uncategorized'); setSideOpen(false) }}>Uncategorized</button>
-
-          <h4>Priority</h4>
-          {['', 'High', 'Medium', 'Low'].map(p => (
-            <button key={p || 'all'} className={`side-item ${priority === p ? 'on' : ''}`} onClick={() => { setPriority(p); setSideOpen(false) }}>
-              {p === '' ? 'All priorities' : (
-                <><span className={`r-dot pri-${p.toLowerCase()}`} /> {p}</>
-              )}
-            </button>
-          ))}
+          <button className={`side-item ${folderId === 'uncategorized' ? 'on' : ''}`} onClick={() => { setFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized'); setSideOpen(false) }}>Uncategorized</button>
         </aside>
 
         <section className="inbox-main">

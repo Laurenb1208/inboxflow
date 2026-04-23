@@ -4,7 +4,6 @@ import { api } from '../lib/api.js'
 import { useAuth } from '../context/Auth.jsx'
 import { COLORS } from '../data/defaults.js'
 import FolderModal from '../components/FolderModal.jsx'
-import FilterModal from '../components/FilterModal.jsx'
 import Toast from '../components/Toast.jsx'
 
 export default function Settings() {
@@ -15,13 +14,12 @@ export default function Settings() {
   const [autoSort, setAutoSort] = useState(true)
   const [autoSortDraft, setAutoSortDraft] = useState(true)
   const [folderModal, setFolderModal] = useState({ open: false, initial: null })
-  const [filterModal, setFilterModal] = useState({ open: false, initial: null })
   const [toast, setToast] = useState('')
   const [syncing, setSyncing] = useState(false)
   const [analytics, setAnalytics] = useState(null)
 
   const colorHex = name => COLORS.find(c => c.name === name)?.hex || '#9ca3af'
-  const folderName = id => folders.find(f => f.id === id)?.name || '—'
+  const linkedFilter = folderId => filters.find(f => f.folderId === folderId)
 
   const refresh = async () => {
     const [f, r, s, a] = await Promise.all([
@@ -37,32 +35,53 @@ export default function Settings() {
   const saveFolder = async (data) => {
     try {
       if (data.id) {
-        await api.patch(`/api/folders/${data.id}`, { name: data.name, color: data.color, priority: data.priority })
+        const existing = folders.find(f => f.id === data.id)
+        await api.patch(`/api/folders/${data.id}`, {
+          name: data.name,
+          color: data.color,
+          priority: existing?.priority || 'Medium',
+        })
+        const linked = linkedFilter(data.id)
+        if (data.keywords) {
+          if (linked) {
+            await api.patch(`/api/filters/${linked.id}`, {
+              name: data.name,
+              keywords: data.keywords,
+              folderId: data.id,
+              priority: linked.priority || 'Medium',
+            })
+          } else {
+            await api.post('/api/filters', {
+              name: data.name,
+              keywords: data.keywords,
+              folderId: data.id,
+              priority: 'Medium',
+            })
+          }
+        }
       } else {
-        await api.post('/api/folders', { name: data.name, color: data.color, priority: data.priority })
+        const folder = await api.post('/api/folders', {
+          name: data.name,
+          color: data.color,
+          priority: 'Medium',
+        })
+        if (data.keywords) {
+          await api.post('/api/filters', {
+            name: folder.name,
+            keywords: data.keywords,
+            folderId: folder.id,
+            priority: 'Medium',
+          })
+        }
       }
       await refresh(); setToast('Folder saved')
     } catch (e) { setToast(e.message) }
   }
+
   const deleteFolder = async (id) => {
-    if (!confirm('Delete this folder? Filters using it will be removed too.')) return
+    if (!confirm('Delete this folder? Its sorting rule will be removed too.')) return
     try {
       await api.del(`/api/folders/${id}`); await refresh(); setToast('Folder deleted')
-    } catch (e) { setToast(e.message) }
-  }
-  const saveFilter = async (data) => {
-    const folder = folders.find(f => f.name === data.folder)
-    if (!folder) return setToast('Pick a valid folder')
-    const payload = { name: data.name, keywords: data.keywords, folderId: folder.id, priority: data.priority }
-    try {
-      if (data.id) await api.patch(`/api/filters/${data.id}`, payload)
-      else await api.post('/api/filters', payload)
-      await refresh(); setToast('Filter saved')
-    } catch (e) { setToast(e.message) }
-  }
-  const deleteFilter = async (id) => {
-    try {
-      await api.del(`/api/filters/${id}`); await refresh(); setToast('Filter deleted')
     } catch (e) { setToast(e.message) }
   }
 
@@ -94,12 +113,10 @@ export default function Settings() {
     }
   }
 
-  const filterFolderInitial = (f) => f ? {
-    ...f, folder: folderName(f.folderId),
-  } : null
-
-  // Convert filters to display format with folder name from id
-  const filtersForModal = folders.map(f => ({ id: f.id, name: f.name }))
+  const openEditFolder = (folder) => {
+    const lf = linkedFilter(folder.id)
+    setFolderModal({ open: true, initial: { ...folder, keywords: lf?.keywords || '' } })
+  }
 
   return (
     <main className="settings-page">
@@ -140,79 +157,43 @@ export default function Settings() {
           <div className="card-head">
             <h2>Folders</h2>
             <button className="btn btn-primary btn-sm" onClick={() => setFolderModal({ open: true, initial: null })}>
-              + Create or Edit
+              + Add Folder
             </button>
           </div>
           {folders.length === 0 ? (
-            <EmptyState icon="📂" title="No folders yet" hint="Create your first folder to start organizing emails." cta="Add folder" onClick={() => setFolderModal({ open: true, initial: null })} />
+            <EmptyState icon="📂" title="No folders yet" hint="Create a folder to start automatically sorting your emails." cta="Add folder" onClick={() => setFolderModal({ open: true, initial: null })} />
           ) : (
             <div className="table-scroll">
-            <table className="data-table">
-              <thead><tr><th>Folder Name</th><th>Color</th><th>Priority</th><th className="right">Actions</th></tr></thead>
-              <tbody>
-                {folders.map(f => (
-                  <tr key={f.id}>
-                    <td>{f.name}</td>
-                    <td><span className="color-cell"><span className="color-dot" style={{ background: colorHex(f.color) }} />{f.color}</span></td>
-                    <td><span className={`pri-pill pri-${f.priority.toLowerCase()}`}>{f.priority}</span></td>
-                    <td className="right">
-                      <button className="link-btn" onClick={() => setFolderModal({ open: true, initial: f })}>Edit</button>
-                      <button className="link-btn danger" onClick={() => deleteFolder(f.id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          )}
-        </section>
-
-        {/* Filters */}
-        <section className="card section-card">
-          <div className="card-head">
-            <h2>Filters &amp; Rules</h2>
-            <button className="btn btn-primary btn-sm" disabled={folders.length === 0}
-              title={folders.length === 0 ? 'Create a folder first' : ''}
-              onClick={() => setFilterModal({ open: true, initial: null })}>
-              + Create or Edit
-            </button>
-          </div>
-          {filters.length === 0 ? (
-            <EmptyState icon="🎯" title="No filters yet" hint="Add a filter to route incoming emails into the right folder." cta="Add filter" onClick={() => setFilterModal({ open: true, initial: null })} />
-          ) : (
-            <div className="table-scroll">
-            <table className="data-table">
-              <thead><tr><th>Filter Name</th><th>Keywords</th><th>Folder Name</th><th className="right">Actions</th></tr></thead>
-              <tbody>
-                {filters.map(f => (
-                  <tr key={f.id}>
-                    <td>{f.name}</td>
-                    <td className="kw">{f.keywords}</td>
-                    <td>{folderName(f.folderId)}</td>
-                    <td className="right">
-                      <button className="link-btn" onClick={() => setFilterModal({ open: true, initial: filterFolderInitial(f) })}>Edit</button>
-                      <button className="link-btn danger" onClick={() => deleteFilter(f.id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          )}
-        </section>
-
-        {/* Priority Tags */}
-        <section className="card section-card">
-          <div className="card-head"><h2>Priority Tags</h2></div>
-          <div className="priority-row">
-            <div className="priority-legend">
-              <span className="legend"><span className="r-dot pri-high" /> High</span>
-              <span className="legend"><span className="r-dot pri-medium" /> Medium</span>
-              <span className="legend"><span className="r-dot pri-low" /> Low</span>
+              <table className="data-table">
+                <thead><tr><th>Folder</th><th>Color</th><th>Keywords</th><th className="right">Actions</th></tr></thead>
+                <tbody>
+                  {folders.map(folder => {
+                    const lf = linkedFilter(folder.id)
+                    return (
+                      <tr key={folder.id}>
+                        <td>{folder.name}</td>
+                        <td><span className="color-cell"><span className="color-dot" style={{ background: colorHex(folder.color) }} />{folder.color}</span></td>
+                        <td className="kw">{lf?.keywords || <span className="muted">—</span>}</td>
+                        <td className="right">
+                          <button className="link-btn" onClick={() => openEditFolder(folder)}>Edit</button>
+                          <button className="link-btn danger" onClick={() => deleteFolder(folder.id)}>Delete</button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
+          )}
+        </section>
+
+        {/* Auto-sort */}
+        <section className="card section-card">
+          <div className="card-head"><h2>Auto-sort</h2></div>
+          <div className="priority-row">
             <div className="auto-sort">
               <span className="auto-sort-label">
-                Automatically sort emails into <strong>high, medium, and low</strong> priority levels
+                Automatically sort incoming emails into folders based on keywords
               </span>
               <label className="switch">
                 <input type="checkbox" checked={autoSortDraft} onChange={e => setAutoSortDraft(e.target.checked)} />
@@ -234,13 +215,6 @@ export default function Settings() {
         initial={folderModal.initial}
         onClose={() => setFolderModal({ open: false, initial: null })}
         onSave={saveFolder}
-      />
-      <FilterModal
-        open={filterModal.open}
-        initial={filterModal.initial}
-        folders={filtersForModal}
-        onClose={() => setFilterModal({ open: false, initial: null })}
-        onSave={saveFilter}
       />
       <Toast message={toast} onDone={() => setToast('')} />
     </main>

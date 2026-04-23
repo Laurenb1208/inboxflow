@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 import Modal from './Modal.jsx'
-import { COLORS, PRIORITIES } from '../data/defaults.js'
+import { COLORS } from '../data/defaults.js'
 
 export default function FolderModal({ open, onClose, onSave, initial }) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('Blue')
-  const [priority, setPriority] = useState('High')
+  const [keywords, setKeywords] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (open) {
       setName(initial?.name || '')
       setColor(initial?.color || 'Blue')
-      setPriority(initial?.priority || 'High')
+      setKeywords(initial?.keywords || '')
       setError('')
     }
   }, [open, initial])
@@ -20,7 +20,7 @@ export default function FolderModal({ open, onClose, onSave, initial }) {
   const submit = e => {
     e.preventDefault()
     if (!name.trim()) return setError('Folder name is required')
-    onSave({ ...(initial || {}), name: name.trim(), color, priority })
+    onSave({ ...(initial || {}), name: name.trim(), color, keywords: keywords.trim() })
     onClose()
   }
 
@@ -40,17 +40,11 @@ export default function FolderModal({ open, onClose, onSave, initial }) {
             </select>
           </div>
         </label>
-        <fieldset className="field">
-          <span>Priority</span>
-          <div className="radio-row">
-            {PRIORITIES.map(p => (
-              <label key={p} className={`radio-pill pri-${p.toLowerCase()} ${priority === p ? 'on' : ''}`}>
-                <input type="radio" name="pri" checked={priority === p} onChange={() => setPriority(p)} />
-                <span className="r-dot" /> {p}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <label className="field">
+          <span>Keywords</span>
+          <input value={keywords} onChange={e => setKeywords(e.target.value)} placeholder="e.g. zoom, calendar, invite" />
+          <small className="hint">Emails matching any keyword will be sorted into this folder</small>
+        </label>
         {error && <div className="error">{error}</div>}
         <button type="submit" className="btn btn-primary btn-block">Save Changes</button>
       </form>

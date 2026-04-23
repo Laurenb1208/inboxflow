@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import FolderModal from '../components/FolderModal.jsx'
-import FilterModal from '../components/FilterModal.jsx'
 import Toast from '../components/Toast.jsx'
 import { COLORS } from '../data/defaults.js'
 
@@ -76,25 +75,16 @@ const SAMPLE_EMAILS = [
 ]
 
 const INIT_FOLDERS = [
-  { id: 'f1', name: 'Meetings', color: 'Blue',   priority: 'High'   },
-  { id: 'f2', name: 'Clients',  color: 'Green',  priority: 'Medium' },
-  { id: 'f3', name: 'Internal', color: 'Purple', priority: 'Low'    },
+  { id: 'f1', name: 'Meetings', color: 'Blue',   keywords: 'zoom, calendar, invite, meeting, reschedule' },
+  { id: 'f2', name: 'Clients',  color: 'Green',  keywords: 'contract, proposal, invoice, deliverable, follow-up' },
+  { id: 'f3', name: 'Internal', color: 'Purple', keywords: 'update, FYI, internal, team, reminder' },
 ]
 
-const INIT_FILTERS = [
-  { id: 'r1', name: 'Meetings', keywords: 'zoom, calendar, invite, meeting, reschedule', folder: 'Meetings', priority: 'High'   },
-  { id: 'r2', name: 'Clients',  keywords: 'contract, proposal, invoice, deliverable, follow-up', folder: 'Clients', priority: 'Medium' },
-  { id: 'r3', name: 'Internal', keywords: 'update, FYI, internal, team, reminder', folder: 'Internal', priority: 'Low'    },
-]
-
-function classify(email, filters, folders) {
+function classify(email, folders) {
   const hay = [email.subject, email.snippet, email.fromAddr, email.fromName].join(' ').toLowerCase()
-  for (const f of filters) {
-    const hit = f.keywords.split(',').map(k => k.trim().toLowerCase()).filter(Boolean).some(k => hay.includes(k))
-    if (hit) {
-      const folder = folders.find(x => x.name === f.folder)
-      if (folder) return { folderId: folder.id, folderName: folder.name, folderColor: folder.color }
-    }
+  for (const folder of folders) {
+    const hit = (folder.keywords || '').split(',').map(k => k.trim().toLowerCase()).filter(Boolean).some(k => hay.includes(k))
+    if (hit) return { folderId: folder.id, folderName: folder.name, folderColor: folder.color }
   }
   return { folderId: null, folderName: null, folderColor: null }
 }
@@ -113,34 +103,28 @@ const uid = () => String(++nextId)
 
 export default function Demo() {
   const [folders, setFolders] = useState(INIT_FOLDERS)
-  const [filters, setFilters] = useState(INIT_FILTERS)
   const [folderModal, setFolderModal] = useState({ open: false, initial: null })
-  const [filterModal, setFilterModal] = useState({ open: false, initial: null })
   const [toast, setToast] = useState('')
   const [activeFolderId, setActiveFolderId] = useState('')
-  const [activePriority, setActivePriority] = useState('')
   const [q, setQ] = useState('')
   const [selected, setSelected] = useState(null)
   const [tab, setTab] = useState('inbox')
 
-  const emails = useMemo(() => SAMPLE_EMAILS.map(e => ({ ...e, ...classify(e, filters, folders) })), [filters, folders])
+  const emails = useMemo(() => SAMPLE_EMAILS.map(e => ({ ...e, ...classify(e, folders) })), [folders])
 
   const visible = useMemo(() => emails.filter(e => {
     if (activeFolderId === 'uncategorized' && e.folderId) return false
     if (activeFolderId && activeFolderId !== 'uncategorized' && e.folderId !== activeFolderId) return false
-    if (activePriority && e.priority !== activePriority) return false
     if (q) {
       const hay = [e.subject, e.snippet, e.fromName, e.fromAddr].join(' ').toLowerCase()
       if (!hay.includes(q.toLowerCase())) return false
     }
     return true
-  }), [emails, activeFolderId, activePriority, q])
+  }), [emails, activeFolderId, q])
 
-  // --- Folder CRUD ---
   const saveFolder = (data) => {
     if (data.id) {
       setFolders(fs => fs.map(f => f.id === data.id ? { ...f, ...data } : f))
-      setFilters(rs => rs.map(r => r.folder === folders.find(f => f.id === data.id)?.name ? { ...r, folder: data.name } : r))
       setToast('Folder updated')
     } else {
       const exists = folders.some(f => f.name.toLowerCase() === data.name.toLowerCase())
@@ -149,30 +133,14 @@ export default function Demo() {
       setToast('Folder created')
     }
   }
+
   const deleteFolder = (id) => {
-    const folder = folders.find(f => f.id === id)
     setFolders(fs => fs.filter(f => f.id !== id))
-    setFilters(rs => rs.filter(r => r.folder !== folder?.name))
     if (activeFolderId === id) setActiveFolderId('')
     setToast('Folder deleted')
   }
 
-  // --- Filter CRUD ---
-  const saveFilter = (data) => {
-    const folder = folders.find(f => f.name === data.folder)
-    if (!folder) { setToast('Pick a valid folder'); return }
-    if (data.id) {
-      setFilters(rs => rs.map(r => r.id === data.id ? { ...r, ...data } : r))
-      setToast('Filter updated')
-    } else {
-      setFilters(rs => [...rs, { ...data, id: uid() }])
-      setToast('Filter created')
-    }
-  }
-  const deleteFilter = (id) => { setFilters(rs => rs.filter(r => r.id !== id)); setToast('Filter deleted') }
-
   const categorized = emails.filter(e => e.folderId).length
-  const highPri = emails.filter(e => e.priority === 'High').length
 
   return (
     <main className="demo-page">
@@ -187,12 +155,12 @@ export default function Demo() {
           <div className="demo-stats">
             <div className="ds"><span className="ds-val">{emails.length}</span><span className="ds-lbl">Emails</span></div>
             <div className="ds"><span className="ds-val">{categorized}</span><span className="ds-lbl">Sorted</span></div>
-            <div className="ds"><span className="ds-val">{highPri}</span><span className="ds-lbl">High</span></div>
+            <div className="ds"><span className="ds-val">{folders.length}</span><span className="ds-lbl">Folders</span></div>
           </div>
 
           <div className="demo-tabs">
             <button className={`dtab ${tab === 'inbox' ? 'on' : ''}`} onClick={() => setTab('inbox')}>📥 Inbox</button>
-            <button className={`dtab ${tab === 'manage' ? 'on' : ''}`} onClick={() => setTab('manage')}>⚙️ Rules</button>
+            <button className={`dtab ${tab === 'manage' ? 'on' : ''}`} onClick={() => setTab('manage')}>⚙️ Folders</button>
           </div>
 
           {tab === 'inbox' && <>
@@ -204,35 +172,22 @@ export default function Demo() {
               </button>
             ))}
             <button className={`side-item ${activeFolderId === 'uncategorized' ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized')}>Uncategorized</button>
-
-            <h4 className="side-heading">Priority</h4>
-            {['', 'High', 'Medium', 'Low'].map(p => (
-              <button key={p || 'all'} className={`side-item ${activePriority === p ? 'on' : ''}`} onClick={() => p === '' ? setActivePriority('') : setActivePriority(cur => cur === p ? '' : p)}>
-                {p === '' ? 'All priorities' : <><span className={`r-dot pri-${p.toLowerCase()}`} /> {p}</>}
-              </button>
-            ))}
           </>}
 
           {tab === 'manage' && <>
             <h4 className="side-heading">Folders <button className="add-btn" onClick={() => setFolderModal({ open: true, initial: null })}>+ Add</button></h4>
+            {folders.length === 0 && <p className="muted" style={{ fontSize: 13, padding: '8px 0' }}>No folders yet — add one to start sorting emails.</p>}
             {folders.map(f => (
-              <div key={f.id} className="manage-row">
-                <span className="color-dot" style={{ background: colorHex(f.color) }} />
-                <span className="manage-name">{f.name}</span>
-                <button className="link-btn tiny" onClick={() => setFolderModal({ open: true, initial: f })}>Edit</button>
-                <button className="link-btn tiny danger" onClick={() => deleteFolder(f.id)}>✕</button>
+              <div key={f.id}>
+                <div className="manage-row">
+                  <span className="color-dot" style={{ background: colorHex(f.color) }} />
+                  <span className="manage-name">{f.name}</span>
+                  <button className="link-btn tiny" onClick={() => setFolderModal({ open: true, initial: f })}>Edit</button>
+                  <button className="link-btn tiny danger" onClick={() => deleteFolder(f.id)}>✕</button>
+                </div>
+                {f.keywords && <p className="muted" style={{ fontSize: 11, margin: '0 0 4px 20px' }}>{f.keywords}</p>}
               </div>
             ))}
-
-            <h4 className="side-heading" style={{ marginTop: 20 }}>Filters <button className="add-btn" onClick={() => setFilterModal({ open: true, initial: null })} disabled={folders.length === 0}>+ Add</button></h4>
-            {filters.map(r => (
-              <div key={r.id} className="manage-row">
-                <span className="manage-name" style={{ fontSize: 12 }}>{r.name}: <span className="muted">{r.keywords}</span></span>
-                <button className="link-btn tiny" onClick={() => setFilterModal({ open: true, initial: r })}>Edit</button>
-                <button className="link-btn tiny danger" onClick={() => deleteFilter(r.id)}>✕</button>
-              </div>
-            ))}
-            {filters.length === 0 && <p className="muted" style={{ fontSize: 13, padding: '8px 0' }}>No filters yet — add one to auto-sort emails.</p>}
           </>}
         </aside>
 
@@ -299,8 +254,6 @@ export default function Demo() {
 
       <FolderModal open={folderModal.open} initial={folderModal.initial}
         onClose={() => setFolderModal({ open: false, initial: null })} onSave={saveFolder} />
-      <FilterModal open={filterModal.open} initial={filterModal.initial} folders={folders}
-        onClose={() => setFilterModal({ open: false, initial: null })} onSave={saveFilter} />
       <Toast message={toast} onDone={() => setToast('')} />
     </main>
   )
