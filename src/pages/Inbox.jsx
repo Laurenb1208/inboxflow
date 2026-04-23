@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
 
 export default function Inbox() {
   const [folders, setFolders] = useState([])
   const [emails, setEmails] = useState([])
   const [folderId, setFolderId] = useState('')
+  const [priority, setPriority] = useState('')
   const [q, setQ] = useState('')
   const [selected, setSelected] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -18,12 +19,13 @@ export default function Inbox() {
     try {
       const params = new URLSearchParams()
       if (folderId) params.set('folderId', folderId)
+      if (priority) params.set('priority', priority)
       if (q) params.set('q', q)
       setEmails(await api.get('/api/emails?' + params.toString()))
     } catch (e) { setError(e.message) } finally { setLoading(false) }
   }
   useEffect(() => { loadFolders() }, [])
-  useEffect(() => { loadEmails() }, [folderId])
+  useEffect(() => { loadEmails() }, [folderId, priority])
   useEffect(() => { const t = setTimeout(loadEmails, 250); return () => clearTimeout(t) }, [q])
 
   const sync = async () => {
@@ -47,11 +49,13 @@ export default function Inbox() {
     if (selected?.id === updated.id) setSelected({ ...selected, manuallyImportant: updated.manuallyImportant })
   }
 
-  const activeFilterLabel = () => {
-    if (folderId === 'uncategorized') return 'Uncategorized'
-    if (folderId) return folders.find(f => f.id === folderId)?.name || 'Folder'
-    return 'All emails'
-  }
+  const activeLabel = (() => {
+    const parts = []
+    if (folderId === 'uncategorized') parts.push('Uncategorized')
+    else if (folderId) parts.push(folders.find(f => f.id === folderId)?.name || '')
+    if (priority) parts.push(priority)
+    return parts.join(' + ')
+  })()
 
   return (
     <main className="inbox-page">
@@ -63,6 +67,7 @@ export default function Inbox() {
           <button className="btn btn-primary btn-block" onClick={sync} disabled={syncing}>
             {syncing ? 'Syncing…' : 'Sync Now'}
           </button>
+
           <h4>Folders</h4>
           <button className={`side-item ${folderId === '' ? 'on' : ''}`} onClick={() => { setFolderId(''); setSideOpen(false) }}>All emails</button>
           {folders.map(f => (
@@ -71,24 +76,40 @@ export default function Inbox() {
             </button>
           ))}
           <button className={`side-item ${folderId === 'uncategorized' ? 'on' : ''}`} onClick={() => { setFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized'); setSideOpen(false) }}>Uncategorized</button>
+
+          <h4>Priority</h4>
+          <button className={`side-item ${priority === '' ? 'on' : ''}`} onClick={() => { setPriority(''); setSideOpen(false) }}>All priorities</button>
+          {['High', 'Medium', 'Low'].map(p => (
+            <button key={p} className={`side-item ${priority === p ? 'on' : ''}`} onClick={() => { setPriority(cur => cur === p ? '' : p); setSideOpen(false) }}>
+              <span className={`r-dot pri-${p.toLowerCase()}`} /> {p}
+            </button>
+          ))}
         </aside>
 
         <section className="inbox-main">
+          <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 8px' }}>
+            Use folders and priority filters to organize your inbox.
+          </p>
           <div className="inbox-toolbar">
             <button className="filter-toggle" onClick={() => setSideOpen(o => !o)} aria-label="Toggle filters">
-              ☰ <span className="filter-label">{activeFilterLabel()}</span>
+              ☰ <span className="filter-label">{activeLabel || 'All emails'}</span>
             </button>
             <input className="search-input" placeholder="Search…" value={q} onChange={e => setQ(e.target.value)} />
             <span className="muted count-label">{emails.length} msg{emails.length === 1 ? '' : 's'}</span>
           </div>
+          {activeLabel && (
+            <div style={{ fontSize: 12, color: '#2563eb', fontWeight: 600, padding: '4px 0 8px' }}>
+              Filtering: {activeLabel}
+            </div>
+          )}
           {error && <div className="error">{error}</div>}
           {loading ? (
             <div className="empty-state"><p>Loading…</p></div>
           ) : emails.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">📭</div>
-              <h4>No emails yet</h4>
-              <p>Click <strong>Sync Now</strong> to pull your most recent emails from Gmail.</p>
+              <h4>No emails match</h4>
+              <p>Try adjusting your filters, or click <strong>Sync Now</strong> to pull new emails.</p>
             </div>
           ) : (
             <div className="email-list">
