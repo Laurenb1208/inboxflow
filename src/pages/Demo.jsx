@@ -1,37 +1,45 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import FolderModal from '../components/FolderModal.jsx'
-import Toast from '../components/Toast.jsx'
 import { COLORS } from '../data/defaults.js'
 
-// ─── Sample emails: Meetings + Clients (H/M/L each) + Uncategorized ─────────
-const SAMPLE_EMAILS = [
-  // MEETINGS — keywords: zoom, calendar, meeting, reschedule, standup
-  { id: 'e1',  priority: 'High',   fromName: 'Sara Johnson',      fromAddr: 'sara@company.com',            subject: 'Zoom link — Q2 planning sync',                  snippet: 'Here is the Zoom link for our Q2 planning call tomorrow at 2 PM. Please join 5 min early.',               receivedAt: '2026-04-22T14:00:00Z' },
-  { id: 'e2',  priority: 'High',   fromName: 'Marcus Lee',        fromAddr: 'lead@partner.io',             subject: 'Calendar invite: project kickoff',              snippet: 'Sending over a calendar invite for the project kickoff meeting next Monday at 10 AM.',                    receivedAt: '2026-04-22T11:00:00Z' },
-  { id: 'e3',  priority: 'Medium', fromName: 'Jamie Torres',      fromAddr: 'jamie@company.com',           subject: 'Zoom standup notes — Apr 22',                   snippet: "Notes from today's standup are attached. Action items highlighted. Next meeting is Thursday.",            receivedAt: '2026-04-22T09:30:00Z' },
-  { id: 'e5',  priority: 'Medium', fromName: 'David Park',        fromAddr: 'dpark@company.com',           subject: 'Rescheduled: leadership sync → Thursday',       snippet: 'Our leadership sync has been rescheduled from Wednesday to Thursday at 3 PM. Calendar updated.',           receivedAt: '2026-04-21T14:30:00Z' },
-  { id: 'e6',  priority: 'Low',    fromName: 'Operations Team',   fromAddr: 'ops@company.com',             subject: 'All-hands meeting tomorrow at 3 PM',            snippet: 'Reminder: all-hands meeting is tomorrow at 3 PM in the main conference room. Zoom link in calendar.',     receivedAt: '2026-04-21T10:00:00Z' },
-  { id: 'e8',  priority: 'Low',    fromName: 'Lisa Wong',         fromAddr: 'lisa@company.com',            subject: 'Weekly team meeting notes — Apr 21',            snippet: "Here are the notes from yesterday's weekly team meeting. Decisions and follow-up actions listed inside.",  receivedAt: '2026-04-20T09:00:00Z' },
-
-  // CLIENTS — keywords: contract, proposal, deliverable, follow-up
-  { id: 'e11', priority: 'High',   fromName: 'Legal @ Acme',      fromAddr: 'legal@acme.co',               subject: 'Updated contract draft for review',             snippet: 'Please review the attached contract draft and let us know if you have any revisions before signing.',      receivedAt: '2026-04-22T13:30:00Z' },
-  { id: 'e13', priority: 'High',   fromName: 'Client Success',    fromAddr: 'cs@bigclient.com',            subject: 'Contract renewal — can we schedule a call?',   snippet: "Our contract is up for renewal next month. I'd love to schedule a call to discuss terms this week.",      receivedAt: '2026-04-21T15:00:00Z' },
-  { id: 'e12', priority: 'Medium', fromName: 'TechCorp Sales',    fromAddr: 'sales@techcorp.com',          subject: 'New proposal for your review',                  snippet: 'Attached is the revised proposal with updated pricing. Let us know your availability to discuss.',         receivedAt: '2026-04-22T09:00:00Z' },
-  { id: 'e16', priority: 'Medium', fromName: 'Zoe Hammond',       fromAddr: 'zoe@partnerco.com',           subject: 'Follow-up: expansion discussion',               snippet: 'Following up on our call last week regarding the potential expansion into the EU market. Let me know.',    receivedAt: '2026-04-20T11:30:00Z' },
-  { id: 'e15', priority: 'Low',    fromName: 'Kate Reynolds',     fromAddr: 'kreynolds@mediaco.com',       subject: 'Deliverable checklist — Q2 campaign',           snippet: 'Sharing the final deliverable checklist for the Q2 campaign. Please confirm which items are in scope.',    receivedAt: '2026-04-20T14:00:00Z' },
-  { id: 'e44', priority: 'Low',    fromName: 'Bloom Agency',      fromAddr: 'projects@bloomagency.co',     subject: 'Final deliverable: brand refresh assets',       snippet: 'All deliverables for the brand refresh project are now complete and uploaded to the shared drive.',        receivedAt: '2026-04-13T11:30:00Z' },
-
-  // UNCATEGORIZED — no keyword match
-  { id: 'e30', priority: null, fromName: 'GitHub',          fromAddr: 'noreply@github.com',       subject: 'Security alert on your repository',         snippet: 'A dependency in your repository has a known vulnerability. Review the Dependabot alert and apply the fix.', receivedAt: '2026-04-22T07:30:00Z' },
-  { id: 'e31', priority: null, fromName: 'Weekly Digest',   fromAddr: 'news@techdigest.com',      subject: 'Your weekly industry digest',               snippet: 'This week in tech: AI tools, remote work trends, SaaS funding rounds, and the top reads from the community.', receivedAt: '2026-04-21T08:00:00Z' },
-  { id: 'e32', priority: null, fromName: 'LinkedIn',        fromAddr: 'messaging@linkedin.com',   subject: '3 new connections are looking at you',      snippet: 'You have 3 new profile views and 2 pending connection requests. Log in to see who wants to connect.',         receivedAt: '2026-04-20T16:00:00Z' },
-  { id: 'e36', priority: null, fromName: 'Webinar Host',    fromAddr: 'events@saasconf.com',      subject: "You're registered: Growth Hacking 2026",    snippet: "You're confirmed for \"Growth Hacking in 2026\" on May 3 at 11 AM ET. A recording will be sent automatically.", receivedAt: '2026-04-17T12:00:00Z' },
+// ─── Exactly 3 demo folders, 4 keywords each ──────────────────────────────
+const INIT_FOLDERS = [
+  { id: 'f1', name: 'Meetings', color: 'Blue',   keywords: 'zoom, calendar, invite, meeting' },
+  { id: 'f2', name: 'Clients',  color: 'Green',  keywords: 'contract, proposal, invoice, follow-up' },
+  { id: 'f3', name: 'Internal', color: 'Purple', keywords: 'update, FYI, internal, team' },
 ]
 
-const INIT_FOLDERS = [
-  { id: 'f1', name: 'Meetings', color: 'Blue',  keywords: 'zoom, calendar, meeting, reschedule, standup' },
-  { id: 'f2', name: 'Clients',  color: 'Green', keywords: 'contract, proposal, deliverable, follow-up' },
+// ─── Sample emails: all 3 folders (H/M/L each) + a few Uncategorized ──────
+const SAMPLE_EMAILS = [
+  // MEETINGS — zoom, calendar, invite, meeting
+  { id: 'e1',  priority: 'High',   fromName: 'Sara Johnson',    fromAddr: 'sara@company.com',          subject: 'Zoom link — Q2 planning sync',               snippet: 'Here is the Zoom link for our Q2 planning call tomorrow at 2 PM. Please join 5 min early.',                receivedAt: '2026-04-22T14:00:00Z' },
+  { id: 'e2',  priority: 'High',   fromName: 'Marcus Lee',      fromAddr: 'lead@partner.io',           subject: 'Calendar invite: project kickoff',           snippet: 'Sending over a calendar invite for the project kickoff meeting next Monday at 10 AM.',                     receivedAt: '2026-04-22T11:00:00Z' },
+  { id: 'e3',  priority: 'Medium', fromName: 'Jamie Torres',    fromAddr: 'jamie@company.com',         subject: 'Zoom standup notes — Apr 22',                snippet: "Notes from today's standup are attached. Action items highlighted. Next meeting is Thursday.",             receivedAt: '2026-04-22T09:30:00Z' },
+  { id: 'e5',  priority: 'Medium', fromName: 'David Park',      fromAddr: 'dpark@company.com',         subject: 'Meeting invite: leadership sync Thursday',   snippet: 'Please accept the invite for our leadership sync rescheduled to Thursday at 3 PM. Calendar updated.',      receivedAt: '2026-04-21T14:30:00Z' },
+  { id: 'e6',  priority: 'Low',    fromName: 'Operations Team', fromAddr: 'ops@company.com',           subject: 'All-hands meeting tomorrow at 3 PM',         snippet: 'Reminder: all-hands meeting is tomorrow at 3 PM in the main conference room. Zoom link in calendar.',      receivedAt: '2026-04-21T10:00:00Z' },
+  { id: 'e8',  priority: 'Low',    fromName: 'Lisa Wong',       fromAddr: 'lisa@company.com',          subject: 'Weekly team meeting notes — Apr 21',         snippet: "Here are the notes from yesterday's weekly team meeting. Decisions and follow-up actions listed inside.",   receivedAt: '2026-04-20T09:00:00Z' },
+
+  // CLIENTS — contract, proposal, invoice, follow-up
+  { id: 'e11', priority: 'High',   fromName: 'Legal @ Acme',    fromAddr: 'legal@acme.co',             subject: 'Updated contract draft for review',          snippet: 'Please review the attached contract draft and let us know if you have any revisions before signing.',       receivedAt: '2026-04-22T13:30:00Z' },
+  { id: 'e13', priority: 'High',   fromName: 'Client Success',  fromAddr: 'cs@bigclient.com',          subject: 'Contract renewal — can we schedule a call?', snippet: "Our contract is up for renewal next month. I'd love to schedule a call to discuss terms this week.",       receivedAt: '2026-04-21T15:00:00Z' },
+  { id: 'e12', priority: 'Medium', fromName: 'TechCorp Sales',  fromAddr: 'sales@techcorp.com',        subject: 'New proposal for your review',               snippet: 'Attached is the revised proposal with updated pricing. Let us know your availability to discuss.',          receivedAt: '2026-04-22T09:00:00Z' },
+  { id: 'e16', priority: 'Medium', fromName: 'Zoe Hammond',     fromAddr: 'zoe@partnerco.com',         subject: 'Follow-up: expansion discussion',            snippet: 'Following up on our call last week regarding the potential expansion into the EU market. Let me know.',     receivedAt: '2026-04-20T11:30:00Z' },
+  { id: 'e15', priority: 'Low',    fromName: 'GlobalVentures',  fromAddr: 'billing@globalv.com',       subject: 'Invoice #4421 attached for approval',        snippet: 'Please find Invoice #4421 for Q1 services attached. Kindly approve for payment within 14 days.',           receivedAt: '2026-04-20T14:00:00Z' },
+  { id: 'e44', priority: 'Low',    fromName: 'Apex Consulting',  fromAddr: 'hello@apexco.com',         subject: 'Follow-up: still waiting on your decision',  snippet: 'Just following up on the proposal I sent last week. Happy to jump on a quick call to answer questions.',    receivedAt: '2026-04-13T11:30:00Z' },
+
+  // INTERNAL — update, FYI, internal, team
+  { id: 'e24', priority: 'High',   fromName: 'Engineering Team', fromAddr: 'eng@company.com',          subject: 'Internal: deployment Saturday night',        snippet: 'Internal notice: we are deploying v2.4 Saturday at 11 PM. Expect up to 30 min of downtime for the API.',  receivedAt: '2026-04-21T13:00:00Z' },
+  { id: 'e26', priority: 'High',   fromName: 'IT Support',       fromAddr: 'it@company.com',           subject: 'Team reminder: 2FA required from Monday',    snippet: 'Friendly reminder: two-factor authentication becomes mandatory for all team members starting this Monday.',  receivedAt: '2026-04-19T11:00:00Z' },
+  { id: 'e22', priority: 'Medium', fromName: 'Priya Nair',       fromAddr: 'priya@company.com',        subject: 'Update: Q3 goals finalized',                 snippet: 'Team update: the Q3 roadmap has been finalized. Please review the shared doc and add your OKRs by EOD.',   receivedAt: '2026-04-22T10:30:00Z' },
+  { id: 'e25', priority: 'Medium', fromName: 'All-Hands',        fromAddr: 'allhands@company.com',     subject: 'Reminder: submit Q2 OKR updates by EOD',     snippet: 'Team reminder — please submit your quarterly OKR updates in the shared tracker by 5 PM today. Thank you!',  receivedAt: '2026-04-20T08:00:00Z' },
+  { id: 'e21', priority: 'Low',    fromName: 'HR Team',          fromAddr: 'hr@company.com',           subject: 'FYI: office closed Friday',                  snippet: 'Just an update — the office will be closed this Friday for scheduled maintenance. Work from home.',          receivedAt: '2026-04-22T12:00:00Z' },
+  { id: 'e23', priority: 'Low',    fromName: 'Alex Kim',         fromAddr: 'alex@company.com',         subject: 'FYI — expense policy change May 1',          snippet: 'A quick FYI: the expense reimbursement policy has been updated effective May 1. See attached PDF.',           receivedAt: '2026-04-21T17:00:00Z' },
+
+  // UNCATEGORIZED — no keyword match
+  { id: 'e30', priority: null, fromName: 'GitHub',        fromAddr: 'noreply@github.com',     subject: 'Security alert on your repository',      snippet: 'A dependency in your repository has a known vulnerability. Review the Dependabot alert and apply the fix.',  receivedAt: '2026-04-22T07:30:00Z' },
+  { id: 'e31', priority: null, fromName: 'Weekly Digest', fromAddr: 'news@techdigest.com',    subject: 'Your weekly industry digest',            snippet: 'This week in tech: AI tools, remote work trends, SaaS funding rounds, and the top reads from the community.',  receivedAt: '2026-04-21T08:00:00Z' },
+  { id: 'e32', priority: null, fromName: 'LinkedIn',      fromAddr: 'messaging@linkedin.com', subject: '3 new connections are looking at you',   snippet: 'You have 3 new profile views and 2 pending connection requests. Log in to see who wants to connect.',           receivedAt: '2026-04-20T16:00:00Z' },
+  { id: 'e36', priority: null, fromName: 'Webinar Host',  fromAddr: 'events@saasconf.com',    subject: "You're registered: Growth Hacking 2026", snippet: "You're confirmed for \"Growth Hacking in 2026\" on May 3 at 11 AM ET. A recording will be sent automatically.", receivedAt: '2026-04-17T12:00:00Z' },
 ]
 
 function classify(email, folders) {
@@ -52,20 +60,13 @@ function fmtDate(iso) {
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
-let nextId = 100
-const uid = () => String(++nextId)
-
 export default function Demo() {
-  const [folders, setFolders] = useState(INIT_FOLDERS)
-  const [folderModal, setFolderModal] = useState({ open: false, initial: null })
-  const [toast, setToast] = useState('')
   const [activeFolderId, setActiveFolderId] = useState('')
   const [activePriority, setActivePriority] = useState('')
   const [q, setQ] = useState('')
   const [selected, setSelected] = useState(null)
-  const [tab, setTab] = useState('inbox')
 
-  const emails = useMemo(() => SAMPLE_EMAILS.map(e => ({ ...e, ...classify(e, folders) })), [folders])
+  const emails = useMemo(() => SAMPLE_EMAILS.map(e => ({ ...e, ...classify(e, INIT_FOLDERS) })), [])
 
   const visible = useMemo(() => emails.filter(e => {
     if (activeFolderId === 'uncategorized' && e.folderId) return false
@@ -81,28 +82,10 @@ export default function Demo() {
   const activeLabel = useMemo(() => {
     const parts = []
     if (activeFolderId === 'uncategorized') parts.push('Uncategorized')
-    else if (activeFolderId) parts.push(folders.find(f => f.id === activeFolderId)?.name || '')
+    else if (activeFolderId) parts.push(INIT_FOLDERS.find(f => f.id === activeFolderId)?.name || '')
     if (activePriority) parts.push(activePriority)
     return parts.join(' + ')
-  }, [activeFolderId, activePriority, folders])
-
-  const saveFolder = (data) => {
-    if (data.id) {
-      setFolders(fs => fs.map(f => f.id === data.id ? { ...f, ...data } : f))
-      setToast('Folder updated')
-    } else {
-      const exists = folders.some(f => f.name.toLowerCase() === data.name.toLowerCase())
-      if (exists) { setToast('A folder with that name already exists'); return }
-      setFolders(fs => [...fs, { ...data, id: uid() }])
-      setToast('Folder created')
-    }
-  }
-
-  const deleteFolder = (id) => {
-    setFolders(fs => fs.filter(f => f.id !== id))
-    if (activeFolderId === id) setActiveFolderId('')
-    setToast('Folder deleted')
-  }
+  }, [activeFolderId, activePriority])
 
   const categorized = emails.filter(e => e.folderId).length
 
@@ -114,53 +97,30 @@ export default function Demo() {
       </div>
 
       <div className="container demo-layout">
-        {/* LEFT: sidebar */}
+        {/* LEFT: sidebar — inbox filters only, no folder management */}
         <aside className="demo-side card">
           <div className="demo-stats">
             <div className="ds"><span className="ds-val">{emails.length}</span><span className="ds-lbl">Emails</span></div>
             <div className="ds"><span className="ds-val">{categorized}</span><span className="ds-lbl">Sorted</span></div>
-            <div className="ds"><span className="ds-val">{folders.length}</span><span className="ds-lbl">Folders</span></div>
+            <div className="ds"><span className="ds-val">{INIT_FOLDERS.length}</span><span className="ds-lbl">Folders</span></div>
           </div>
 
-          <div className="demo-tabs">
-            <button className={`dtab ${tab === 'inbox' ? 'on' : ''}`} onClick={() => setTab('inbox')}>📥 Inbox</button>
-            <button className={`dtab ${tab === 'manage' ? 'on' : ''}`} onClick={() => setTab('manage')}>⚙️ Folders</button>
-          </div>
+          <h4 className="side-heading">Folders</h4>
+          <button className={`side-item ${activeFolderId === '' ? 'on' : ''}`} onClick={() => setActiveFolderId('')}>All emails</button>
+          {INIT_FOLDERS.map(f => (
+            <button key={f.id} className={`side-item ${activeFolderId === f.id ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === f.id ? '' : f.id)}>
+              <span className="color-dot" style={{ background: colorHex(f.color) }} /> {f.name}
+            </button>
+          ))}
+          <button className={`side-item ${activeFolderId === 'uncategorized' ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized')}>Uncategorized</button>
 
-          {tab === 'inbox' && <>
-            <h4 className="side-heading">Folders</h4>
-            <button className={`side-item ${activeFolderId === '' ? 'on' : ''}`} onClick={() => setActiveFolderId('')}>All emails</button>
-            {folders.map(f => (
-              <button key={f.id} className={`side-item ${activeFolderId === f.id ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === f.id ? '' : f.id)}>
-                <span className="color-dot" style={{ background: colorHex(f.color) }} /> {f.name}
-              </button>
-            ))}
-            <button className={`side-item ${activeFolderId === 'uncategorized' ? 'on' : ''}`} onClick={() => setActiveFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized')}>Uncategorized</button>
-
-            <h4 className="side-heading">Priority</h4>
-            <button className={`side-item ${activePriority === '' ? 'on' : ''}`} onClick={() => setActivePriority('')}>All priorities</button>
-            {['High', 'Medium', 'Low'].map(p => (
-              <button key={p} className={`side-item ${activePriority === p ? 'on' : ''}`} onClick={() => setActivePriority(cur => cur === p ? '' : p)}>
-                <span className={`r-dot pri-${p.toLowerCase()}`} /> {p}
-              </button>
-            ))}
-          </>}
-
-          {tab === 'manage' && <>
-            <h4 className="side-heading">Folders <button className="add-btn" onClick={() => setFolderModal({ open: true, initial: null })}>+ Add</button></h4>
-            {folders.length === 0 && <p className="muted" style={{ fontSize: 13, padding: '8px 0' }}>No folders yet — add one to start sorting emails.</p>}
-            {folders.map(f => (
-              <div key={f.id}>
-                <div className="manage-row">
-                  <span className="color-dot" style={{ background: colorHex(f.color) }} />
-                  <span className="manage-name">{f.name}</span>
-                  <button className="link-btn tiny" onClick={() => setFolderModal({ open: true, initial: f })}>Edit</button>
-                  <button className="link-btn tiny danger" onClick={() => deleteFolder(f.id)}>✕</button>
-                </div>
-                {f.keywords && <p className="muted" style={{ fontSize: 11, margin: '0 0 4px 20px' }}>{f.keywords}</p>}
-              </div>
-            ))}
-          </>}
+          <h4 className="side-heading">Priority</h4>
+          <button className={`side-item ${activePriority === '' ? 'on' : ''}`} onClick={() => setActivePriority('')}>All priorities</button>
+          {['High', 'Medium', 'Low'].map(p => (
+            <button key={p} className={`side-item ${activePriority === p ? 'on' : ''}`} onClick={() => setActivePriority(cur => cur === p ? '' : p)}>
+              <span className={`r-dot pri-${p.toLowerCase()}`} /> {p}
+            </button>
+          ))}
         </aside>
 
         {/* MAIN: email list */}
@@ -232,10 +192,6 @@ export default function Demo() {
           </div>
         </div>
       )}
-
-      <FolderModal open={folderModal.open} initial={folderModal.initial}
-        onClose={() => setFolderModal({ open: false, initial: null })} onSave={saveFolder} />
-      <Toast message={toast} onDone={() => setToast('')} />
     </main>
   )
 }
