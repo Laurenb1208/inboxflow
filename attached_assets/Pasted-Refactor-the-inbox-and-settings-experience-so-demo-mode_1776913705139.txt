@@ -1,0 +1,54 @@
+Refactor the inbox and settings experience so demo mode and signed-in mode use the SAME structure and UI, but different data sources.
+
+Goal:
+The app should feel consistent for all users. Demo mode and signed-in mode should share the same layout, components, and structure. The only difference should be the data source.
+
+What I want:
+
+1. Use the SAME inbox/settings structure for both demo and signed-in users
+- same sidebar layout
+- same cards
+- same settings layout
+- same folder/rule display format
+- same email card format
+- same spacing and styling
+
+2. Demo mode should use ONLY these fixed folders:
+- Meetings
+  keywords: zoom, calendar, invite, meeting
+- Clients
+  keywords: contract, proposal, invoice, follow-up
+- Internal
+  keywords: update, FYI, internal, team
+
+3. Signed-in mode should initially match the same basic structure as demo mode
+- if a signed-in user has not created custom folders yet, show the same default starter folders:
+  - Meetings
+  - Clients
+  - Internal
+- once the user creates, edits, or deletes folders, then use their real custom data
+
+4. Keep demo and signed-in data separate
+- demo mode should never use real database folders
+- signed-in mode should use database folders only after user data exists
+- if signed-in user has no custom folder setup yet, seed/use the same starter structure as the demo
+
+5. Folder/rule management
+- folders and their keywords should appear in the same format in both demo and signed-in settings
+- users should be able to edit/add/delete their folders in signed-in mode
+- demo mode stays fixed and non-personal
+
+6. Emails
+- demo emails should match the 3 demo folders above
+- signed-in emails should use the user’s actual data
+- if a signed-in user is brand new and has no custom setup yet, the folder structure should still mirror demo formatting
+
+7. Do not make demo copy my real account folders
+- demo stays fixed
+- signed-in mode matches the same structure, not the same personal data
+
+Expected result:
+- Demo and signed-in views look structurally the same
+- Demo uses fixed sample folders/data
+- Signed-in users start with the same clean default structure until they customize it
+- Once users create their own folders/rules, their real data replaces the defaults

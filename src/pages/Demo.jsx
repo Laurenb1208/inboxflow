@@ -208,6 +208,7 @@ export default function Demo() {
                 <div className="manage-row">
                   <span className="color-dot" style={{ background: colorHex(f.color) }} />
                   <span className="manage-name">{f.name}</span>
+                  {f.priority && <span className={`pri-pill pri-${f.priority.toLowerCase()}`} style={{ fontSize: 10, padding: '2px 8px' }}>{f.priority}</span>}
                   <button className="link-btn tiny" onClick={() => setFolderModal({ open: true, initial: f })}>Edit</button>
                   <button className="link-btn tiny danger" onClick={() => deleteFolder(f.id)}>✕</button>
                 </div>
