@@ -9,7 +9,7 @@ Full-stack email organization web app. React + Vite frontend, Node/Express backe
 - **DB**: Postgres via `DATABASE_URL`. Tables managed by Drizzle (`server/db/schema.js`). Sessions stored in `session` table via `connect-pg-simple`.
 - **Auth**: Google OAuth 2.0 with `gmail.readonly`, `email`, `profile`, `openid` scopes. Refresh tokens encrypted at rest with AES-256-GCM (`TOKEN_ENCRYPTION_KEY`).
 - **Sync**: Manual only. Pulls latest 100 INBOX messages per click, classifies each by user-defined keyword filters (subject + snippet + sender), stores metadata + 200-char snippet only.
-- **UX model**: Folders are the primary concept. Creating a folder auto-creates a linked keyword filter. The inbox sidebar filters by folder only (no separate priority filter). Priority is still assigned internally and shown as a pill on email cards, but is not a sidebar filter option.
+- **UX model**: Folders are the primary concept. Creating a folder auto-creates a linked keyword filter. Each folder has a Priority level (High/Medium/Low) which is automatically assigned to every email sorted into that folder. The inbox sidebar filters by folder and/or priority. Email cards show folder tag + priority badge. Uncategorized emails have no priority badge.
 
 ## Commands
 

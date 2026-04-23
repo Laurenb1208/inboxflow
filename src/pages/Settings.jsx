@@ -34,44 +34,23 @@ export default function Settings() {
 
   const saveFolder = async (data) => {
     try {
+      const pri = data.priority || 'Medium'
       if (data.id) {
-        const existing = folders.find(f => f.id === data.id)
-        await api.patch(`/api/folders/${data.id}`, {
-          name: data.name,
-          color: data.color,
-          priority: existing?.priority || 'Medium',
-        })
+        await api.patch(`/api/folders/${data.id}`, { name: data.name, color: data.color, priority: pri })
         const linked = linkedFilter(data.id)
         if (data.keywords) {
           if (linked) {
             await api.patch(`/api/filters/${linked.id}`, {
-              name: data.name,
-              keywords: data.keywords,
-              folderId: data.id,
-              priority: linked.priority || 'Medium',
+              name: data.name, keywords: data.keywords, folderId: data.id, priority: pri,
             })
           } else {
-            await api.post('/api/filters', {
-              name: data.name,
-              keywords: data.keywords,
-              folderId: data.id,
-              priority: 'Medium',
-            })
+            await api.post('/api/filters', { name: data.name, keywords: data.keywords, folderId: data.id, priority: pri })
           }
         }
       } else {
-        const folder = await api.post('/api/folders', {
-          name: data.name,
-          color: data.color,
-          priority: 'Medium',
-        })
+        const folder = await api.post('/api/folders', { name: data.name, color: data.color, priority: pri })
         if (data.keywords) {
-          await api.post('/api/filters', {
-            name: folder.name,
-            keywords: data.keywords,
-            folderId: folder.id,
-            priority: 'Medium',
-          })
+          await api.post('/api/filters', { name: folder.name, keywords: data.keywords, folderId: folder.id, priority: pri })
         }
       }
       await refresh(); setToast('Folder saved')
@@ -165,7 +144,7 @@ export default function Settings() {
           ) : (
             <div className="table-scroll">
               <table className="data-table">
-                <thead><tr><th>Folder</th><th>Color</th><th>Keywords</th><th className="right">Actions</th></tr></thead>
+                <thead><tr><th>Folder</th><th>Color</th><th>Priority</th><th>Keywords</th><th className="right">Actions</th></tr></thead>
                 <tbody>
                   {folders.map(folder => {
                     const lf = linkedFilter(folder.id)
@@ -173,6 +152,11 @@ export default function Settings() {
                       <tr key={folder.id}>
                         <td>{folder.name}</td>
                         <td><span className="color-cell"><span className="color-dot" style={{ background: colorHex(folder.color) }} />{folder.color}</span></td>
+                        <td>
+                          {folder.priority
+                            ? <span className={`pri-pill pri-${folder.priority.toLowerCase()}`}>{folder.priority}</span>
+                            : <span className="muted">—</span>}
+                        </td>
                         <td className="kw">{lf?.keywords || <span className="muted">—</span>}</td>
                         <td className="right">
                           <button className="link-btn" onClick={() => openEditFolder(folder)}>Edit</button>

@@ -17,7 +17,7 @@ export function classify(email, userFilters, userFolders) {
     if (hit) {
       const folder = userFolders.find(x => x.id === f.folderId)
       if (folder) {
-        return { folderId: folder.id, priority: f.priority, matchedFilterId: f.id }
+        return { folderId: folder.id, priority: folder.priority, matchedFilterId: f.id }
       }
     }
   }

@@ -6,9 +6,9 @@ import { COLORS } from '../data/defaults.js'
 
 // ─── Exactly 3 demo folders, 4 keywords each ──────────────────────────────
 const INIT_FOLDERS = [
-  { id: 'f1', name: 'Meetings', color: 'Blue',   keywords: 'zoom, calendar, invite, meeting' },
-  { id: 'f2', name: 'Clients',  color: 'Green',  keywords: 'contract, proposal, invoice, follow-up' },
-  { id: 'f3', name: 'Internal', color: 'Purple', keywords: 'update, FYI, internal, team' },
+  { id: 'f1', name: 'Meetings', color: 'Blue',   priority: 'High',   keywords: 'zoom, calendar, invite, meeting' },
+  { id: 'f2', name: 'Clients',  color: 'Green',  priority: 'Medium', keywords: 'contract, proposal, invoice, follow-up' },
+  { id: 'f3', name: 'Internal', color: 'Purple', priority: 'Low',    keywords: 'update, FYI, internal, team' },
 ]
 
 // ─── 60 sample emails across all 3 folders + Uncategorized ───────────────
@@ -86,9 +86,9 @@ function classify(email, folders) {
   const hay = [email.subject, email.snippet, email.fromAddr, email.fromName].join(' ').toLowerCase()
   for (const folder of folders) {
     const hit = (folder.keywords || '').split(',').map(k => k.trim().toLowerCase()).filter(Boolean).some(k => hay.includes(k))
-    if (hit) return { folderId: folder.id, folderName: folder.name, folderColor: folder.color }
+    if (hit) return { folderId: folder.id, folderName: folder.name, folderColor: folder.color, priority: folder.priority }
   }
-  return { folderId: null, folderName: null, folderColor: null }
+  return { folderId: null, folderName: null, folderColor: null, priority: null }
 }
 
 function colorHex(name) { return COLORS.find(c => c.name === name)?.hex || '#9ca3af' }

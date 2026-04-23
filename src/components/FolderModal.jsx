@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react'
 import Modal from './Modal.jsx'
 import { COLORS } from '../data/defaults.js'
 
+const PRIORITIES = ['High', 'Medium', 'Low']
+
 export default function FolderModal({ open, onClose, onSave, initial }) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('Blue')
   const [keywords, setKeywords] = useState('')
+  const [priority, setPriority] = useState('High')
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -13,6 +16,7 @@ export default function FolderModal({ open, onClose, onSave, initial }) {
       setName(initial?.name || '')
       setColor(initial?.color || 'Blue')
       setKeywords(initial?.keywords || '')
+      setPriority(initial?.priority || 'High')
       setError('')
     }
   }, [open, initial])
@@ -20,7 +24,7 @@ export default function FolderModal({ open, onClose, onSave, initial }) {
   const submit = e => {
     e.preventDefault()
     if (!name.trim()) return setError('Folder name is required')
-    onSave({ ...(initial || {}), name: name.trim(), color, keywords: keywords.trim() })
+    onSave({ ...(initial || {}), name: name.trim(), color, keywords: keywords.trim(), priority })
     onClose()
   }
 
@@ -39,6 +43,13 @@ export default function FolderModal({ open, onClose, onSave, initial }) {
               {COLORS.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
             </select>
           </div>
+        </label>
+        <label className="field">
+          <span>Priority Level</span>
+          <select value={priority} onChange={e => setPriority(e.target.value)}>
+            {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <small className="hint">Emails sorted into this folder will be assigned this priority</small>
         </label>
         <label className="field">
           <span>Keywords</span>
