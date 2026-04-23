@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "node --watch server/index.js",
-    "dev:web": "vite",
+    "dev:web": "VITE_APP_URL=https://$REPLIT_DEV_DOMAIN vite",
     "build": "vite build",
     "prestart": "node_modules/.bin/drizzle-kit push --force || echo '[inboxflow] WARNING: schema push failed - check DATABASE_URL'",
     "start": "node server/index.js",
