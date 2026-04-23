@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
+import { COLORS } from '../data/defaults.js'
+import InboxSidebar from '../components/InboxSidebar.jsx'
+
+const colorHex = name => COLORS.find(c => c.name === name)?.hex || '#9ca3af'
 
 export default function Inbox() {
   const [folders, setFolders] = useState([])
@@ -57,33 +61,25 @@ export default function Inbox() {
     return parts.join(' + ')
   })()
 
+  const closeSide = () => setSideOpen(false)
+
   return (
     <main className="inbox-page">
       <div className="container inbox-grid">
 
-        {sideOpen && <div className="side-overlay" onClick={() => setSideOpen(false)} />}
+        {sideOpen && <div className="side-overlay" onClick={closeSide} />}
 
         <aside className={`inbox-side card ${sideOpen ? 'side-open' : ''}`}>
           <button className="btn btn-primary btn-block" onClick={sync} disabled={syncing}>
             {syncing ? 'Syncing…' : 'Sync Now'}
           </button>
-
-          <h4>Folders</h4>
-          <button className={`side-item ${folderId === '' ? 'on' : ''}`} onClick={() => { setFolderId(''); setSideOpen(false) }}>All emails</button>
-          {folders.map(f => (
-            <button key={f.id} className={`side-item ${folderId === f.id ? 'on' : ''}`} onClick={() => { setFolderId(cur => cur === f.id ? '' : f.id); setSideOpen(false) }}>
-              <span className="color-dot" /> {f.name}
-            </button>
-          ))}
-          <button className={`side-item ${folderId === 'uncategorized' ? 'on' : ''}`} onClick={() => { setFolderId(cur => cur === 'uncategorized' ? '' : 'uncategorized'); setSideOpen(false) }}>Uncategorized</button>
-
-          <h4>Priority</h4>
-          <button className={`side-item ${priority === '' ? 'on' : ''}`} onClick={() => { setPriority(''); setSideOpen(false) }}>All priorities</button>
-          {['High', 'Medium', 'Low'].map(p => (
-            <button key={p} className={`side-item ${priority === p ? 'on' : ''}`} onClick={() => { setPriority(cur => cur === p ? '' : p); setSideOpen(false) }}>
-              <span className={`r-dot pri-${p.toLowerCase()}`} /> {p}
-            </button>
-          ))}
+          <InboxSidebar
+            folders={folders}
+            activeFolderId={folderId}
+            setFolderId={(val) => { setFolderId(val); closeSide() }}
+            activePriority={priority}
+            setPriority={(val) => { setPriority(val); closeSide() }}
+          />
         </aside>
 
         <section className="inbox-main">
@@ -125,7 +121,10 @@ export default function Inbox() {
                   <div className="subj">{e.subject || '(no subject)'}</div>
                   <div className="snip">{e.snippet}</div>
                   <div className="email-row3">
-                    {e.folderName ? <span className="folder-pill">{e.folderName}</span> : <span className="folder-pill empty">Uncategorized</span>}
+                    {e.folderName
+                      ? <span className="folder-pill" style={{ background: colorHex(e.folderColor) + '22', color: colorHex(e.folderColor) }}>{e.folderName}</span>
+                      : <span className="folder-pill empty">Uncategorized</span>
+                    }
                     {e.priority && <span className={`pri-pill pri-${e.priority.toLowerCase()}`}>{e.priority}</span>}
                   </div>
                 </div>
@@ -147,7 +146,12 @@ export default function Inbox() {
               <div className="detail-row"><span className="label">From</span> {selected.fromName ? `${selected.fromName} <${selected.fromAddr}>` : selected.fromAddr}</div>
               <div className="detail-row"><span className="label">Date</span> {formatDate(selected.receivedAt, true)}</div>
               <div className="detail-row"><span className="label">Folder</span> {selected.folderName || 'Uncategorized'}</div>
-              {selected.priority && <div className="detail-row"><span className="label">Priority</span> <span className={`pri-pill pri-${selected.priority.toLowerCase()}`}>{selected.priority}</span></div>}
+              {selected.priority && (
+                <div className="detail-row">
+                  <span className="label">Priority</span>
+                  <span className={`pri-pill pri-${selected.priority.toLowerCase()}`}>{selected.priority}</span>
+                </div>
+              )}
               <h4 className="detail-subj">{selected.subject || '(no subject)'}</h4>
               <p className="detail-snip">{selected.snippet}</p>
               <div className="detail-actions">

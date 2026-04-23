@@ -9,7 +9,9 @@ Full-stack email organization web app. React + Vite frontend, Node/Express backe
 - **DB**: Postgres via `DATABASE_URL`. Tables managed by Drizzle (`server/db/schema.js`). Sessions stored in `session` table via `connect-pg-simple`.
 - **Auth**: Google OAuth 2.0 with `gmail.readonly`, `email`, `profile`, `openid` scopes. Refresh tokens encrypted at rest with AES-256-GCM (`TOKEN_ENCRYPTION_KEY`).
 - **Sync**: Manual only. Pulls latest 100 INBOX messages per click, classifies each by user-defined keyword filters (subject + snippet + sender), stores metadata + 200-char snippet only.
-- **UX model**: Folders are the primary concept. Creating a folder auto-creates a linked keyword filter. Each folder has a Priority level (High/Medium/Low) which is automatically assigned to every email sorted into that folder. The inbox sidebar filters by folder and/or priority. Email cards show folder tag + priority badge. Uncategorized emails have no priority badge.
+- **UX model**: Folders are the primary concept. Creating a folder auto-creates a linked keyword filter. Each folder has a Priority level (High/Medium/Low) which is automatically assigned to every email sorted into that folder. The inbox sidebar filters by folder and/or priority. Email cards show folder tag + priority badge (colored by folder color). Uncategorized emails have no priority badge.
+- **Shared components**: `InboxSidebar` (folder+priority filter nav used by both Demo and Inbox), `FolderTable` (folder management table used by both Demo settings tab and Settings page), `FolderModal` (create/edit folder with name/color/priority/keywords).
+- **Demo/Inbox parity**: Demo and signed-in inbox use identical layout (demo-layout grid with demo-side + inbox-main), same email card format, same sidebar structure. Demo settings tab shows the same folder table as Settings.jsx. New signed-in users are seeded with the same 3 starter folders as the demo (Meetings/Clients/Internal with 4 keywords each).
 
 ## Commands
 

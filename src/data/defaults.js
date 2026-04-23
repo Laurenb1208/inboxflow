@@ -24,9 +24,9 @@ export const DEFAULT_SETTINGS = {
     { id: 'f3', name: 'Internal', color: 'Purple', priority: 'Low' },
   ],
   filters: [
-    { id: 'r1', name: 'Meetings', keywords: 'zoom, calendar', folder: 'Meetings', priority: 'High' },
-    { id: 'r2', name: 'Clients', keywords: 'contract, proposal', folder: 'Clients', priority: 'Medium' },
-    { id: 'r3', name: 'Internal', keywords: 'update, FYI', folder: 'Internal', priority: 'Low' },
+    { id: 'r1', name: 'Meetings', keywords: 'zoom, calendar, invite, meeting', folder: 'Meetings', priority: 'High' },
+    { id: 'r2', name: 'Clients', keywords: 'contract, proposal, invoice, follow-up', folder: 'Clients', priority: 'Medium' },
+    { id: 'r3', name: 'Internal', keywords: 'update, FYI, internal, team', folder: 'Internal', priority: 'Low' },
   ],
   autoSort: true,
 }

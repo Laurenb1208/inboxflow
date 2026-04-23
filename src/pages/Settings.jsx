@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/Auth.jsx'
-import { COLORS } from '../data/defaults.js'
 import FolderModal from '../components/FolderModal.jsx'
+import FolderTable from '../components/FolderTable.jsx'
 import Toast from '../components/Toast.jsx'
 
 export default function Settings() {
@@ -18,7 +18,6 @@ export default function Settings() {
   const [syncing, setSyncing] = useState(false)
   const [analytics, setAnalytics] = useState(null)
 
-  const colorHex = name => COLORS.find(c => c.name === name)?.hex || '#9ca3af'
   const linkedFilter = folderId => filters.find(f => f.folderId === folderId)
 
   const refresh = async () => {
@@ -139,36 +138,12 @@ export default function Settings() {
               + Add Folder
             </button>
           </div>
-          {folders.length === 0 ? (
-            <EmptyState icon="📂" title="No folders yet" hint="Create a folder to start automatically sorting your emails." cta="Add folder" onClick={() => setFolderModal({ open: true, initial: null })} />
-          ) : (
-            <div className="table-scroll">
-              <table className="data-table">
-                <thead><tr><th>Folder</th><th>Color</th><th>Priority</th><th>Keywords</th><th className="right">Actions</th></tr></thead>
-                <tbody>
-                  {folders.map(folder => {
-                    const lf = linkedFilter(folder.id)
-                    return (
-                      <tr key={folder.id}>
-                        <td>{folder.name}</td>
-                        <td><span className="color-cell"><span className="color-dot" style={{ background: colorHex(folder.color) }} />{folder.color}</span></td>
-                        <td>
-                          {folder.priority
-                            ? <span className={`pri-pill pri-${folder.priority.toLowerCase()}`}>{folder.priority}</span>
-                            : <span className="muted">—</span>}
-                        </td>
-                        <td className="kw">{lf?.keywords || <span className="muted">—</span>}</td>
-                        <td className="right">
-                          <button className="link-btn" onClick={() => openEditFolder(folder)}>Edit</button>
-                          <button className="link-btn danger" onClick={() => deleteFolder(folder.id)}>Delete</button>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <FolderTable
+            folders={folders}
+            getKeywords={folder => linkedFilter(folder.id)?.keywords || ''}
+            onEdit={openEditFolder}
+            onDelete={deleteFolder}
+          />
         </section>
 
         {/* Auto-sort */}

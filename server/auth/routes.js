@@ -15,9 +15,9 @@ const SAMPLE_FOLDERS = [
 ]
 
 const SAMPLE_FILTERS = [
-  { name: 'Meetings', keywords: 'zoom, calendar', folder: 'Meetings', priority: 'High', rank: 1 },
-  { name: 'Clients', keywords: 'contract, proposal', folder: 'Clients', priority: 'Medium', rank: 2 },
-  { name: 'Internal', keywords: 'update, FYI', folder: 'Internal', priority: 'Low', rank: 3 },
+  { name: 'Meetings', keywords: 'zoom, calendar, invite, meeting', folder: 'Meetings', priority: 'High', rank: 1 },
+  { name: 'Clients', keywords: 'contract, proposal, invoice, follow-up', folder: 'Clients', priority: 'Medium', rank: 2 },
+  { name: 'Internal', keywords: 'update, FYI, internal, team', folder: 'Internal', priority: 'Low', rank: 3 },
 ]
 
 // Step 1 — redirect the browser to Google's consent screen
